@@ -66,7 +66,7 @@ class GRN(object):
 		Each gene has a chance of mu to mutate
 		'''
 		for i in range(self.nodes.shape[1]):
-			if(rand.random()<=0.05):
+			if(rand.random()<=mu):
 				print "mutating gene "+str(i)+"!"
 				self.mutate(i)
 	def mutate(self,i):
@@ -80,16 +80,16 @@ class GRN(object):
 				r_u+=1
 		print "r_u: "+str(r_u)
 		probability_to_lose_interaction=(4.0*r_u)/(4*r_u+(N-r_u))  #check this formula with Dr. Bongard, it doesn't make sense
+		
 		print 'probability_to_lose_interaction: '+str(probability_to_lose_interaction)
-		if(rand.random()<=probability_to_lose_interaction):
+		if(rand.random() <= probability_to_lose_interaction):
 			#lose an interaction
-			interactions=[]
+			interactions = []
 			for edge in range(0,self.edges.shape[1]):
-				if(edge!=0):
+				if(edge != 0):
 					interactions.append(edge)
-			if(len(interactions)>0):
-				toRemove=random.choice(interactions)
-				print interactions
+			if(len(interactions) > 0):
+				toRemove = random.choice(interactions)
 				self.edges[toRemove,i]=0
 				print "removed edge from "+str(toRemove)+" to "+str(i)
 				raw_input("enter to continue")
@@ -97,7 +97,7 @@ class GRN(object):
 			#gain an interaction
 			non_interactions=[]
 			for edge in range(0,self.edges.shape[1]):
-				if(edge==0):
+				if(self.edges[edge,i]==0):
 					non_interactions.append(edge)
 			if(len(non_interactions)>0):
 				toAdd=random.choice(non_interactions)
