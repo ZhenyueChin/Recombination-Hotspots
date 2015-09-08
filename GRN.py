@@ -111,7 +111,23 @@ class GRN(object):
 				raw_input("enter to continue")
 
 	def update_state(self):
-		print "unimplemented"
+		'''
+		Runs one iteration of network interactions, a single timestep
+		As described on page 2 of the original paper, in 'Model'
+		'''
+
+		temp = 0
+		old_nodes=self.nodes.copy()
+		print old_nodes
+		for regulated_node in range(self.nodes.shape[0]):
+			for regulator_node in range(self.edges.shape[0]):
+				temp += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
+
+			if temp > 0:
+				self.nodes[regulated_node] = 1
+			else:
+				self.nodes[regulated_node] = -1
+
 	def visualize_state(self):
 		'''
 		Shows the current activation state of the 10 genes
@@ -159,9 +175,8 @@ class GRN(object):
 		
 
 def main():
-	grn = GRN(np.matrix([0,1,0,1,0,1,0,1,0,1]))
-	print grn.edges
+	grn = GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]))
 	for i in range(0,100):
-		grn.perturb(0.05)
-		print grn.edges
+		grn.update_state()
+		#print grn.edges
 main()
