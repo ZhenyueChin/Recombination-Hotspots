@@ -11,19 +11,26 @@ class GRN(object):
 	between nodes. 
 	'''
 
-	def __init__(self, n, e = None):
+	def __init__(self, n, e):
 		'''
 		todo: In the paper, how the initial population is formed is not entirely clear.
 		are we supposed to have 100 clones of a single random network for the initial population, 
 		or 100 random networks?
 		'''
 
-		self.nodes = n
-
-		if(e == None):
-			e = self.initialize_edges(10, 10)
-		
+		self.nodes = np.array([0]*n)
 		self.edges = e
+		self.fitness = -1
+
+	def __str__(self):
+		return "\n"+str(self.edges)+"\n"
+
+	def copy(self):
+		'''
+		deep copy
+		'''
+		#print type(GRN(len(self.nodes),self.edges.copy()))
+		return GRN(len(self.nodes),self.edges.copy())
 
 	@staticmethod
 	def matrix_create(rows, columns):
@@ -66,26 +73,25 @@ class GRN(object):
 
 	def perturb(self, mu):
 		'''
-		Each gene has a chance of mu to mutate
+		Each gene (node) has a chance of mu to mutate
 		'''
-		for i in range(self.nodes.shape[1]):
+		for i in range(self.nodes.shape[0]):
 			if(rand.random()<=mu):
-				print "mutating gene "+str(i)+"!"
+				#print "mutating gene "+str(i)+"!"
 				self.mutate(i)
 
 	def mutate(self,i):
 		'''
 		Mutates the specified gene at index i according to the rule specified in page 9 of the original paper
 		'''
-		N = self.nodes.shape[1]									#number of nodes in the network
+		N = self.nodes.shape[0]									#number of nodes in the network
 		r_u = 0  												#number of regulators for this gene
 		for j in range(0,self.edges.shape[0]):
 			if(self.edges[j,i]!=0):  							#if the mutated node is regulated by j
 				r_u+=1
-		print "r_u: "+str(r_u)
+
 		probability_to_lose_interaction=(4.0*r_u)/(4*r_u+(N-r_u))  #check this formula with Dr. Bongard, it doesn't make sense
 		
-		print 'probability_to_lose_interaction: '+str(probability_to_lose_interaction)
 		if(rand.random() <= probability_to_lose_interaction):
 			#lose an interaction
 			interactions = []
@@ -95,8 +101,8 @@ class GRN(object):
 			if(len(interactions) > 0):
 				toRemove = random.choice(interactions)
 				self.edges[toRemove,i]=0
-				print "removed edge from "+str(toRemove)+" to "+str(i)
-				raw_input("enter to continue")
+				#print "removed edge from "+str(toRemove)+" to "+str(i)
+				#raw_input("enter to continue")
 		else:
 			#gain an interaction
 			non_interactions=[]
@@ -107,12 +113,12 @@ class GRN(object):
 				toAdd=random.choice(non_interactions)
 				if(rand.random()<0.5):
 					self.edges[toAdd,i]=1
-					print "added positive edge from "+str(toAdd)+" to "+str(i)
+					#print "added positive edge from "+str(toAdd)+" to "+str(i)
 				else:
 					self.edges[toAdd,i]=-1
-					print "added negative edge from "+str(toAdd)+" to "+str(i)
+					#print "added negative edge from "+str(toAdd)+" to "+str(i)
 				
-				raw_input("enter to continue")
+				#raw_input("enter to continue")
 
 	def update_state(self):
 		'''
@@ -126,6 +132,7 @@ class GRN(object):
 		counter = 0
 		no_change = True
 		temp = 0
+		old_nodes=self.nodes.copy()
 		for regulated_node in range(self.nodes.shape[0]):
 			for regulator_node in range(self.edges.shape[0]):
 				temp += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
@@ -138,7 +145,8 @@ class GRN(object):
 				self.nodes[regulated_node] = -1
 				if self.nodes[regulated_node] != -1:
 					no_change = False
-
+			# print old_nodes
+			# print self.nodes
 		return no_change
 
 	def visualize_state(self):
