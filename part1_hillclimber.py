@@ -114,7 +114,7 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 def test_chaos():
 	pop_size=5000
 	max_cycle=500
-	initial_nodes = np.array([1,-1,1,1,-1,-1,1,-1,1,1])
+	initial_nodes = np.array([1,1,1,1,1,1,1,1,1,1])
 	
 	count_hash = dict()
 	population=list()
@@ -139,9 +139,9 @@ def test_chaos():
 def test_hill_climber():
 	target        = np.array([-1,-1,-1,-1,1,1,1,1,-1,-1])
 	initial_nodes = np.array([1,-1,1,1,-1,-1,1,-1,1,1])
-	max_cycle = 5000
+	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 500
+	generations = 50000
 	mu = 0.05
 	parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu)
 
