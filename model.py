@@ -18,7 +18,7 @@ class GRN(object):
 		or 100 random networks?
 		'''
 
-		self.nodes = np.array([0]*n)
+		self.nodes = n
 		self.edges = e
 		self.fitness = -1
 
@@ -30,7 +30,7 @@ class GRN(object):
 		deep copy
 		'''
 		#print type(GRN(len(self.nodes),self.edges.copy()))
-		return GRN(len(self.nodes),self.edges.copy())
+		return GRN(self.nodes,self.edges.copy())
 
 	@staticmethod
 	def matrix_create(rows, columns):
@@ -130,24 +130,23 @@ class GRN(object):
 		'''
 
 		counter = 0
-		no_change = True
-		temp = 0
-		old_nodes=self.nodes.copy()
-		for regulated_node in range(self.nodes.shape[0]):
-			for regulator_node in range(self.edges.shape[0]):
-				temp += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
+		still_active = False
+		influence = 0
+		old_nodes = self.nodes.copy()
+		for regulated_node in range(self.edges.shape[0]):
+			for regulator_node in range(self.edges.shape[1]):
+				influence += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
 
-			if temp > 0:
-				if self.nodes[regulated_node] != 1:
-					no_change = False
+			if influence > 0:
 				self.nodes[regulated_node] = 1
 			else:
 				self.nodes[regulated_node] = -1
-				if self.nodes[regulated_node] != -1:
-					no_change = False
-			# print old_nodes
-			# print self.nodes
-		return no_change
+			if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
+				still_active=True
+
+			#print old_nodes
+			#print self.nodes
+		return still_active
 
 	def visualize_state(self):
 		'''
