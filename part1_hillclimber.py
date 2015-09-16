@@ -111,30 +111,6 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 	print "chaotic networks: ", NUM_CHAOTIC_NETWORKS
 	print "networks evaluated: " , len(population)*generations
 
-def test_chaos():
-	pop_size=5000
-	max_cycle=500
-	initial_nodes = np.array([1,1,1,1,1,1,1,1,1,1])
-	
-	count_hash = dict()
-	population=list()
-	for i in range(pop_size):
-		initial_edges = model.GRN.initialize_edges(10,10)
-		grn = (model.GRN(initial_nodes,initial_edges))
-
-		counter = 0
-		while(counter < max_cycle and grn.update_state()):
-			counter += 1
-	
-		if counter in count_hash:
-			count_hash[counter]+=1
-		else:
-			count_hash[counter]=1
-		update_progress(float(i)/pop_size)
-	
-	for key, value in sorted(count_hash.items()):
-		print("{} : {}".format(key, value))
-
 
 def test_hill_climber():
 	target        = np.array([-1,-1,-1,-1,1,1,1,1,-1,-1])
@@ -147,8 +123,7 @@ def test_hill_climber():
 
 
 def main():
-	
-	test_chaos()
-	# test_hill_climber()
+
+	test_hill_climber()
 
 main()
