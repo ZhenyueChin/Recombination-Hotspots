@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import model
 import sys
+import pickle
 
 
 def hamming(attractor, target):
@@ -19,7 +20,7 @@ def hamming(attractor, target):
 	return len(attractor)-count
 
 
-def generate_initial_attractors(target,set_size,mu):
+def generate_initial_attractors(target,set_size,p):
 	'''
 	Generates a random set of perturbations of the target set for evaluation
 	'''
@@ -28,31 +29,32 @@ def generate_initial_attractors(target,set_size,mu):
 	for i in range(set_size):
 		temp = target.copy()
 		for j in range(len(temp)):
-			if(random.rand()<mu):
+			if(random.rand()<p):
 				temp[j]=np.random.choice(possible_values, 1)[0]
 		returnables.append(temp)
-		print temp
 
 	return returnables
 
-def evaluate(individual, max_cycle, target_attractor,mu):
+def evaluate(individual, max_cycle, target_attractor,p):
 	'''
 	Run the network until it reaches a stable attractor, or exceeds the allowed number
 	of generations, return the fitness of this individual
 	'''
-	fitness = 0
+	fitness = 0.0
 	#generate a random set of perturbations of the target attractor:
-	start_attractors = generate_initial_attractors(target_attractor,200,mu)
+	start_attractors = generate_initial_attractors(target_attractor,200,p)
 	fitness_values = list()
 
 	for initial_state in start_attractors:
 		#print initial_state
 		individual.nodes=initial_state
+		#print individual.nodes
 		counter = 0
 		while(counter <= max_cycle and individual.update_state()):
 			counter += 1
 
 		if(counter <= max_cycle):
+			#print "stable"
 			#not chaotic or cyclic
 			ham = hamming(individual.nodes,target_attractor)
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
@@ -62,7 +64,7 @@ def evaluate(individual, max_cycle, target_attractor,mu):
 
 	print fitness_values
 	my_sum = sum(fitness_values)
-	print my_sum
+	#print my_sum
 	return my_sum/len(fitness_values)
 
 def update_progress(i):
@@ -73,7 +75,7 @@ def update_progress(i):
 	sys.stdout.write("\r%.0f%%" % (i*100))
 	sys.stdout.flush()
 
-def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu):
+def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu,p):
 	'''
 	As a very simple first step, I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using a hill climber evolutionary
@@ -104,7 +106,7 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 			#print "fitness: ",  evaluate(individual,max_cycle,target)
 			child = individual.copy()
 			child.perturb(mu)
-			child.fitness = evaluate(child,max_cycle,target,mu)
+			child.fitness = evaluate(child,max_cycle,target,p)
 			#print "child fitness: " , child.fitness
 			if child.fitness > individual.fitness:
 				# print child.fitness, " better than: " , individual.fitness
@@ -113,25 +115,29 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 
 				if individual.fitness > best.fitness:
 					best = individual
-					print "new best: " , best.nodes , " with fitness: " , best.fitness
+					print "new best with fitness: " , best.fitness
 					
 
 		
 		update_progress(gen*1.0/(generations-1))
 	print "\nComplete!"
 	if(best.fitness>-1):
-		print " here is the closest stable attractor to target: " , best.nodes , " with fitness: " , best.fitness
+		print "The network that produced the most accurate attractors had fitness: " , best.fitness
 	print "networks evaluated: " , len(population)*generations
 
+	with open('best_network.pickle', 'wb') as handle:
+ 		pickle.dump(best, handle)
+	
 
 def test_hill_climber():
-	target        = np.array([-1,-1,-1,-1,1,1,1,1,-1,-1])
-	initial_nodes = np.array([1,-1,1,1,-1,-1,1,-1,1,1])
+	target        = np.array([-1,-1,-1,-1,-1,-1,-1,-1,-1,-1])
+	initial_nodes = np.array([1,1,1,1,1,1,1,1,1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 500
+	generations = 50
 	mu = 0.05
-	parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu)
+	p=0.15
+	parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu,p)
 
 
 def main():

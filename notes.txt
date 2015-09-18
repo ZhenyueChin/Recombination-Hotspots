@@ -1,13 +1,13 @@
 9/14/15
-I successfully implemented a hill climber for GRNs, but I am plagued by chaos issues. I will meet with Dr. Bongard tomorrow, but in order to find a reasonable max_cycle value (my cutoff for passing verdict on the chaotic nature of a network) I will devise a test: Initialize a sample of random new networks as in text, and run each once. I will set the cutoff to be very high, and see the distribution of cycle length. I suspect that most networks will be chaotic, and those that are not will all be relatively low, say single digits of iterations. This will give me a good cutoff point to make chaotic networks less computationally expensive.
+I successfully implemented a hill climber for GRNs, but I am plagued by chaos/cycle issues. I will meet with Dr. Bongard tomorrow, but in order to find a reasonable max_cycle value (my cutoff for passing verdict on the chaotic/cyclic nature of a network) I will devise a test: Initialize a sample of random new networks as in text, and run each once. I will set the cutoff to be very high, and see the distribution of cycle length. I suspect that most networks will be chaotic/cyclic, and those that are not will all be relatively low, say single digits of iterations. This will give me a good cutoff point to make chaotic networks less computationally expensive.
 
 Here are the results of my experimentation, with a single fixed starting node state
+
 Trial 1:
 	pop_size=5000
 	max_cycle=500
 	starting node state: [1,-1,1,1,-1,-1,1,-1,1,1]
 
-100%
 0 : 662
 1 : 470
 2 : 208
@@ -23,12 +23,10 @@ Trial 1:
 500 : 3333
 
 Trial 2:
-
 	pop_size=5000
 	max_cycle=500
 	starting node state: [1,1,1,1,1,1,1,1,1,1]
 
-100%
 0 : 665
 1 : 411
 2 : 211
