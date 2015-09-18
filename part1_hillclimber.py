@@ -24,13 +24,14 @@ def generate_initial_attractors(target,set_size,mu):
 	Generates a random set of perturbations of the target set for evaluation
 	'''
 	returnables = list()
-	possible_values = [-1, - 1]
+	possible_values = [-1, 1]
 	for i in range(set_size):
 		temp = target.copy()
 		for j in range(len(temp)):
 			if(random.rand()<mu):
 				temp[j]=np.random.choice(possible_values, 1)[0]
 		returnables.append(temp)
+		print temp
 
 	return returnables
 
@@ -45,6 +46,7 @@ def evaluate(individual, max_cycle, target_attractor,mu):
 	fitness_values = list()
 
 	for initial_state in start_attractors:
+		#print initial_state
 		individual.nodes=initial_state
 		counter = 0
 		while(counter <= max_cycle and individual.update_state()):
