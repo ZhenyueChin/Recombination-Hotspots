@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import model
 import sys
-NUM_CHAOTIC_NETWORKS = 0
+
+
 def hamming(attractor, target):
 	'''
 	TODO: make this cooler
@@ -17,29 +18,51 @@ def hamming(attractor, target):
 			count += 1
 	return len(attractor)-count
 
-def fitness(attractor,target):
-	'''
-	Determine the fitness of a network after it reaches a stable attractor,
-	using Hamming distance, as described in page 8 of the original paper.
-	'''
 
-	return (1-(hamming(attractor,target)/float(len(target)))) #raise to the 5th
+def generate_initial_attractors(target,set_size,mu):
+	'''
+	Generates a random set of perturbations of the target set for evaluation
+	'''
+	returnables = list()
+	possible_values = [-1, - 1]
+	for i in range(set_size):
+		temp = target.copy()
+		for j in range(len(temp)):
+			if(random.rand()<mu):
+				temp[j]=np.random.choice(possible_values, 1)[0]
+		returnables.append(temp)
 
-def evaluate(individual, max_cycle, target_attractor):
+	print returnables
+	return returnables
+
+def evaluate(individual, max_cycle, target_attractor,mu):
 	'''
 	Run the network until it reaches a stable attractor, or exceeds the allowed number
 	of generations, return the fitness of this individual
 	'''
-	counter = 0
-	while(counter <= max_cycle and individual.update_state()):
-		counter += 1
+	fitness = 0
+	#generate a random set of perturbations of the target attractor:
+	start_attractors = generate_initial_attractors(target_attractor,200,mu)
+	fitness_values = list()
 
-	if(counter > max_cycle):
-		#print "chaotic"
-		global NUM_CHAOTIC_NETWORKS
-		NUM_CHAOTIC_NETWORKS+=1
-		return -1
-	return fitness(individual.nodes,target_attractor)
+	for initial_state in start_attractors:
+		individual.nodes=initial_state
+		counter = 0
+		while(counter <= max_cycle and individual.update_state()):
+			counter += 1
+
+		if(counter <= max_cycle):
+			#not chaotic or cyclic
+			ham = hamming(individual.nodes,target_attractor)
+			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
+			fitness_values.append(this_fitness)
+		else:
+			fitness_values.append(0) #zero fitness for chaotic/cyclic state
+
+	print fitness_values
+	my_sum = sum(fitness_values)
+	print my_sum
+	return my_sum/len(fitness_values)
 
 def update_progress(i):
 	'''
@@ -76,7 +99,7 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 
 	#Find fitness for each individual:
 	for individual in population:
-			individual.fitness = evaluate(individual,max_cycle,target)
+			individual.fitness = evaluate(individual,max_cycle,target,mu)
 
 	#evolutionary loop is initiated:
 	best = population[0]
@@ -90,7 +113,7 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 			#print "fitness: ",  evaluate(individual,max_cycle,target)
 			child = individual.copy()
 			child.perturb(mu)
-			child.fitness = evaluate(child,max_cycle,target)
+			child.fitness = evaluate(child,max_cycle,target,mu)
 			#print "child fitness: " , child.fitness
 			if child.fitness > individual.fitness:
 				# print child.fitness, " better than: " , individual.fitness
