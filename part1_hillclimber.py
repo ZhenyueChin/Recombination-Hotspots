@@ -32,7 +32,6 @@ def generate_initial_attractors(target,set_size,mu):
 				temp[j]=np.random.choice(possible_values, 1)[0]
 		returnables.append(temp)
 
-	print returnables
 	return returnables
 
 def evaluate(individual, max_cycle, target_attractor,mu):
@@ -87,16 +86,6 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 		population.append(model.GRN(initial_nodes,initial_edges))
 
 
-	#First we test for chaos in our initial seed population. Ask Bongard about this.
-	counter = 0
-	while(counter < max_cycle and population[0].update_state()):
-		counter += 1
-	
-	print "initial cycle length: ",counter
-	if(counter==max_cycle):
-		print "initial network was chaotic: restart?"
-		#return
-
 	#Find fitness for each individual:
 	for individual in population:
 			individual.fitness = evaluate(individual,max_cycle,target,mu)
@@ -130,8 +119,6 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 	print "\nComplete!"
 	if(best.fitness>-1):
 		print " here is the closest stable attractor to target: " , best.nodes , " with fitness: " , best.fitness
-	global NUM_CHAOTIC_NETWORKS
-	print "chaotic networks: ", NUM_CHAOTIC_NETWORKS
 	print "networks evaluated: " , len(population)*generations
 
 
@@ -140,7 +127,7 @@ def test_hill_climber():
 	initial_nodes = np.array([1,-1,1,1,-1,-1,1,-1,1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 50000
+	generations = 500
 	mu = 0.05
 	parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generations,mu)
 
