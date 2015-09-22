@@ -104,28 +104,36 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	for individual in population:
 			individual.fitness = evaluate(individual,max_cycle,target,mu)
 
+	print "initial fitness of network: "+str(individual.fitness)
 	#evolutionary loop is initiated:
 	best = population[0]
-	best.fitness=-1
+	#best.fitness=-1
 	for gen in range(generations-1):
 		
 		#each network is evaluated
-		for individual in population:
+		for individual in range(len(population)):
 			#print "nodes: " , individual.nodes
 			#print "fitness: ",  evaluate(individual,max_cycle,target)
-			child = individual.copy()
+			child = population[individual].copy()
 			child.perturb(mu)
 			child.fitness = evaluate(child,max_cycle,target,p)
 			#print "child fitness: " , child.fitness
-			if child.fitness > individual.fitness:
+			if child.fitness > population[individual].fitness:
 				# print child.fitness, " better than: " , individual.fitness
 
-				individual = child
+				population[individual] = child
 
-				if individual.fitness > best.fitness:
-					best = individual
+				if population[individual].fitness > best.fitness:
+					best = population[individual]
+				if(pop_size==1):
 					print "new best with fitness: " , best.fitness
-					
+				else:
+					temp_fits = list()
+					for ind in population:
+						temp_fits.append(("%.2f" % ind.fitness))
+
+					sys.stdout.write('\r')
+					sys.stdout.write('    '+str(temp_fits))
 
 		
 		update_progress(gen*1.0/(generations-1))

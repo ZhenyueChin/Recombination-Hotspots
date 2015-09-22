@@ -32,6 +32,11 @@ class GRN(object):
 		#print type(GRN(len(self.nodes),self.edges.copy()))
 		return GRN(self.nodes,self.edges.copy())
 
+	def measure_modularity(self):
+		'''
+		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
+		'''
+		
 	@staticmethod
 	def matrix_create(rows, columns):
 		'''
@@ -128,18 +133,22 @@ class GRN(object):
 		stable attractor.
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
-
+		
 		counter = 0
 		still_active = False
 		influence = 0
 		old_nodes = self.nodes.copy()
 		for regulated_node in range(self.edges.shape[1]):
+			isolated = True 
 			for regulator_node in range(self.edges.shape[0]):
-				influence += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
+				edge_influence = (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
+				if(edge_influence!=0): #there are edges feeding in to this node
+					isolated=False
+				influence += edge_influence
 
 			if influence > 0:
 				self.nodes[regulated_node] = 1
-			elif influence < 0:
+			elif(influence <= 0 and not isolated):
 				self.nodes[regulated_node] = -1
 			if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
 				still_active=True

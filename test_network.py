@@ -16,6 +16,7 @@ def main(v):
 
 	nodes = np.array(v)
 	max_cycle=20
+	
 	with open('best_network.pickle', 'rb') as handle:
   		individual = pickle.load(handle)
 
@@ -36,7 +37,7 @@ def main(v):
 		print "stable"
 		print individual.nodes
 	else:
-		print "chaotic"
+		print "chaotic or cyclic"
 
 	individual.visualize_network()
 
