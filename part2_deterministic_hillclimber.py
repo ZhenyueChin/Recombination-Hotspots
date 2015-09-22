@@ -29,8 +29,8 @@ def generate_initial_attractors(target,set_size,p):
 	for i in range(set_size):
 		temp = target.copy()
 		for j in range(len(temp)):
-			if(random.rand()<p):
-				temp[j]=np.random.choice(possible_values, 1)[0]
+			if(rand.rand()<p):
+				temp[j]=np.rand.choice(possible_values, 1)[0]
 		returnables.append(temp)
 
 	return returnables
@@ -107,6 +107,7 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	print "initial fitness of network: "+str(individual.fitness)
 	#evolutionary loop is initiated:
 	best = population[0]
+	print best
 	#best.fitness=-1
 	for gen in range(generations-1):
 		
@@ -157,7 +158,7 @@ def test_hill_climber():
 
 
 def main():
-
+	rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
 	test_hill_climber()
 
 main()

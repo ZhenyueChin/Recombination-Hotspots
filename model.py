@@ -17,7 +17,6 @@ class GRN(object):
 		are we supposed to have 100 clones of a single random network for the initial population, 
 		or 100 random networks?
 		'''
-
 		self.nodes = n
 		self.edges = e
 		self.fitness = -1
@@ -104,7 +103,7 @@ class GRN(object):
 				if(edge != 0):
 					interactions.append(edge)
 			if(len(interactions) > 0):
-				toRemove = random.choice(interactions)
+				toRemove = rand.choice(interactions)
 				self.edges[toRemove,i]=0
 				#print "removed edge from "+str(toRemove)+" to "+str(i)
 				#raw_input("enter to continue")
@@ -115,7 +114,7 @@ class GRN(object):
 				if(self.edges[edge,i]==0):
 					non_interactions.append(edge)
 			if(len(non_interactions)>0):
-				toAdd=random.choice(non_interactions)
+				toAdd=rand.choice(non_interactions)
 				if(rand.random()<0.5):
 					self.edges[toAdd,i]=1
 					#print "added positive edge from "+str(toAdd)+" to "+str(i)
