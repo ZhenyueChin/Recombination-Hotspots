@@ -163,7 +163,7 @@ class GRN(object):
 		active_nodes = []
 		inactive_nodes = []
 		numNeurons = len(self.nodes)
-		neuronPositions=matrix_create(numNeurons,2)
+		neuronPositions=self.matrix_create(numNeurons,2)
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
 		angleUpdate = 2 * pi /numNeurons
@@ -173,11 +173,8 @@ class GRN(object):
 			angle = angle + angleUpdate
 			neuronPositions[i,0]=x
 			neuronPositions[i,1]=y
-			if(self.nodes[i]==1):
-				active_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=18)
-			else:
-				inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=18)
-		
+
+		#draw straight connections (non-reccurent)	
 		for i in range(0,numNeurons):
 			for other in range(0,neuronPositions.shape[0]):
 				#w = int(10*abs(synapseValues[i,other]))+1
@@ -190,7 +187,22 @@ class GRN(object):
 		
 					plt.plot([neuronPositions[i,0],neuronPositions[other,0]],
 						[neuronPositions[i,1],neuronPositions[other,1]],color)
+		for i in range(0,numNeurons):
+			if(self.edges[i,i]!=0): #recurrent connection
+				if self.edges[i,i]>0:
+					color = "green"
+				else:
+					color = "red"
+				plt.plot(neuronPositions[i,0]*1.1,neuronPositions[i,1]*1.1,'ko',markerfacecolor=[1,1,1],markeredgecolor=color,markersize=25)
+			if(self.nodes[i]==1):
+					
+				active_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=18)
+			else:
+					
+				inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=18)
+			
 		plt.legend()
+		plt.axis((-1.5,1.5,-1.5,1.5))
 		plt.show()
 		
 

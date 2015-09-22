@@ -97,6 +97,7 @@ def parallel_hill_climber(target, initial_nodes, max_cycle, pop_size, generation
 	#evolutionary loop is initiated:
 	best = population[0]
 	best.fitness=-1
+	best.visualize_network()
 	for gen in range(generations-1):
 		
 		#each network is evaluated
