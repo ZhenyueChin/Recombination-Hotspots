@@ -59,27 +59,22 @@ def evaluate(individual, max_cycle, target_attractor,p):
 	fitness_values = list()
 
 	for initial_state in start_attractors:
-		#print initial_state
 		individual.nodes=initial_state
-		#print individual.nodes
 		counter = 0
-		#print hamming(individual.nodes,target_attractor)
 		while(counter <= max_cycle and individual.update_state()):
 			counter += 1
-			
+
 		if(counter <= max_cycle):
-			#print "stable"
-			#not chaotic or cyclic
+			#stable, not chaotic or cyclic
 			ham = hamming(individual.nodes,target_attractor)
-			#print ham
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
 			fitness_values.append(this_fitness)
 		else:
 			fitness_values.append(0) #zero fitness for chaotic/cyclic state
 
-	print fitness_values
+	#print fitness_values
 	my_sum = sum(fitness_values)
-	#print my_sum
+
 	return my_sum/len(fitness_values)
 
 def update_progress(i):
@@ -147,7 +142,7 @@ def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 50
+	generations = 500
 	mu = 0.05
 	p=0.15
 	parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p)
