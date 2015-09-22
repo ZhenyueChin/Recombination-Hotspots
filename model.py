@@ -167,6 +167,7 @@ class GRN(object):
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
 		angleUpdate = 2 * pi /numNeurons
+		ax = plt.axes()
 		for i in range(0,numNeurons):
 			x = sin(angle)
 			y = cos(angle)
@@ -184,9 +185,14 @@ class GRN(object):
 						color = "green"
 					else:
 						color = "red"
-		
-					plt.plot([neuronPositions[i,0],neuronPositions[other,0]],
-						[neuronPositions[i,1],neuronPositions[other,1]],color)
+					
+					ax.arrow(neuronPositions[i,0],
+							neuronPositions[i,1], 
+							(neuronPositions[other,0]-neuronPositions[i,0])*0.9,
+							(neuronPositions[other,1]-neuronPositions[i,1])*0.9, 
+							head_width=0.05, head_length=0.1, fc=color, ec=color)
+							#shape='left')
+
 		for i in range(0,numNeurons):
 			if(self.edges[i,i]!=0): #recurrent connection
 				if self.edges[i,i]>0:
@@ -201,7 +207,7 @@ class GRN(object):
 					
 				inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=18)
 			
-		plt.legend()
+		#plt.legend()
 		plt.axis((-1.5,1.5,-1.5,1.5))
 		plt.show()
 		

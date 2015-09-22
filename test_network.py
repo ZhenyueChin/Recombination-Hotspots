@@ -21,15 +21,20 @@ def main(v):
 
 	print "the network:" 
 	print individual.edges
+
+	individual.visualize_network()
   	individual.nodes=nodes
 	counter = 0
 	while(counter <= max_cycle and individual.update_state()):
 		counter += 1
+		individual.visualize_network()
 
 	if(counter <= max_cycle):
 		print "stable"
 		print individual.nodes
 	else:
-		print chaotic
+		print "chaotic"
+
+	individual.visualize_network()
 
 main(sys.argv)
