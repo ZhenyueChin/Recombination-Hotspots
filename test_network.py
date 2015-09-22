@@ -22,11 +22,14 @@ def main(v):
 	print "the network:" 
 	print individual.edges
 
-	individual.visualize_network()
+	
   	individual.nodes=nodes
+  	print individual.nodes
+  	individual.visualize_network()
 	counter = 0
 	while(counter <= max_cycle and individual.update_state()):
 		counter += 1
+		print individual.nodes
 		individual.visualize_network()
 
 	if(counter <= max_cycle):

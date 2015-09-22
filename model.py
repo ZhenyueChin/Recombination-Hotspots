@@ -133,8 +133,8 @@ class GRN(object):
 		still_active = False
 		influence = 0
 		old_nodes = self.nodes.copy()
-		for regulated_node in range(self.edges.shape[0]):
-			for regulator_node in range(self.edges.shape[1]):
+		for regulated_node in range(self.edges.shape[1]):
+			for regulator_node in range(self.edges.shape[0]):
 				influence += (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
 
 			if influence > 0:
@@ -143,9 +143,7 @@ class GRN(object):
 				self.nodes[regulated_node] = -1
 			if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
 				still_active=True
-
-			#print old_nodes
-			#print self.nodes
+			influence = 0
 		return still_active
 
 	def visualize_state(self):
@@ -206,7 +204,7 @@ class GRN(object):
 			else:
 					
 				inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=18)
-			
+			ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
 		#plt.legend()
 		plt.axis((-1.5,1.5,-1.5,1.5))
 		plt.show()
