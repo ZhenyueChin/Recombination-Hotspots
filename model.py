@@ -153,6 +153,18 @@ class GRN(object):
 
 		plt.imshow(np.reshape(self.nodes, (-1, 1)), cmap=plt.cm.gray, aspect='auto',interpolation='nearest',origin='left')
 		plt.show()
+	def shorten_line(self,x,y):
+		'''
+		Does some nasty geometry to find proper x' , y' to shorten arrows appropriately in graphical representation of network
+		'''
+		if(y==0 and x==0):
+			return 0,0
+		a = 0.18
+		y_prime = (math.sqrt((a**2)*(y**2)-2*a*(y**2)*math.sqrt((x**2)+(y**2))+(x**2)*(y**2)+y**4))/math.sqrt((x**2)+(y**2))
+		if(y<0):
+			y_prime=-y_prime
+		x_prime= ((x*1.0)/y)*y_prime
+		return x_prime,y_prime
 
 	def visualize_network(self):
 		'''
@@ -183,11 +195,11 @@ class GRN(object):
 						color = "green"
 					else:
 						color = "red"
-					
+					arrow_x,arrow_y=self.shorten_line((neuronPositions[other,0]-neuronPositions[i,0]),
+							(neuronPositions[other,1]-neuronPositions[i,1]))
 					ax.arrow(neuronPositions[i,0],
 							neuronPositions[i,1], 
-							(neuronPositions[other,0]-neuronPositions[i,0])*0.9,
-							(neuronPositions[other,1]-neuronPositions[i,1])*0.9, 
+							arrow_x,arrow_y,
 							head_width=0.05, head_length=0.1, fc=color, ec=color)
 							#shape='left')
 
