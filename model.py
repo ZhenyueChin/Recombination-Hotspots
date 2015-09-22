@@ -63,11 +63,11 @@ class GRN(object):
 		e = GRN.matrix_create(m, n)
 
 	    #apply random interactions to unique indexes
-		for pair in seen:
-			if (rand.random()<0.5):
-				e[pair[0],pair[1]] = 1
-			else: 
-				e[pair[0],pair[1]] = -1
+		# for pair in seen:
+		# 	if (rand.random()<0.5):
+		# 		e[pair[0],pair[1]] = 1
+		# 	else: 
+		# 		e[pair[0],pair[1]] = -1
 
 		return e
 
@@ -139,7 +139,7 @@ class GRN(object):
 
 			if influence > 0:
 				self.nodes[regulated_node] = 1
-			else:
+			elif influence < 0:
 				self.nodes[regulated_node] = -1
 			if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
 				still_active=True

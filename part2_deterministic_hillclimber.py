@@ -1,5 +1,5 @@
-#Part one: Specialization Increases Modularity
-#Implemented as simple hillclimber to start
+#Part two: Specialization Increases Modularity
+#Implemented as simple hillclimber to start, with deterministic perturbations
 from scipy import *
 import random as rand
 import numpy as np
@@ -41,8 +41,21 @@ def evaluate(individual, max_cycle, target_attractor,p):
 	of generations, return the fitness of this individual
 	'''
 	fitness = 0.0
-	#generate a random set of perturbations of the target attractor:
-	start_attractors = generate_initial_attractors(target_attractor,200,p)
+	#generate a DETERMINISTIC set of perturbations of the target attractor:
+	#start_attractors = generate_initial_attractors(target_attractor,200,p)
+	start_attractors = [
+						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
+						]
 	fitness_values = list()
 
 	for initial_state in start_attractors:
@@ -50,13 +63,15 @@ def evaluate(individual, max_cycle, target_attractor,p):
 		individual.nodes=initial_state
 		#print individual.nodes
 		counter = 0
+		#print hamming(individual.nodes,target_attractor)
 		while(counter <= max_cycle and individual.update_state()):
 			counter += 1
-
+			
 		if(counter <= max_cycle):
 			#print "stable"
 			#not chaotic or cyclic
 			ham = hamming(individual.nodes,target_attractor)
+			#print ham
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
 			fitness_values.append(this_fitness)
 		else:
@@ -101,7 +116,8 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 		
 		#each network is evaluated
 		for individual in population:
-			
+			#print "nodes: " , individual.nodes
+			#print "fitness: ",  evaluate(individual,max_cycle,target)
 			child = individual.copy()
 			child.perturb(mu)
 			child.fitness = evaluate(child,max_cycle,target,p)
@@ -128,7 +144,7 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	
 
 def test_hill_climber():
-	target        = np.array([-1,-1,-1,-1,-1,-1,-1,-1,-1,-1])
+	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
 	generations = 50
