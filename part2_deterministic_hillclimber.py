@@ -60,8 +60,8 @@ def evaluate(individual, max_cycle, target_attractor,p):
 
 	for initial_state in start_attractors:
 		individual.nodes[0]=initial_state
-		counter = 0
-		while(counter <= max_cycle and individual.update_state()):
+		counter = 1
+		while(counter <= max_cycle and individual.update_state(counter)):
 			counter += 1
 
 		if(counter <= max_cycle):
@@ -146,12 +146,11 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	with open('best_network.pickle', 'wb') as handle:
  		pickle.dump(best, handle)
 	
-
 def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 500
+	generations = 10
 	mu = 0.05
 	p=0.15
 	parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p)
@@ -160,5 +159,4 @@ def test_hill_climber():
 def main():
 	rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
 	test_hill_climber()
-
 main()

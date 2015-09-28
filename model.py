@@ -125,7 +125,7 @@ class GRN(object):
 				
 				#raw_input("enter to continue")
 
-	def update_state(self):
+	def update_state(self,t):
 		'''
 		Runs one iteration of network interactions, a single timestep
 		As described on page 2 of the original paper, in 'Model'
@@ -133,28 +133,17 @@ class GRN(object):
 		stable attractor.
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
-		changed=False
-		reached_attractor=False
-		t = 1
-		while(t<20 and not reached_attractor):
-			for target_gene in range(0,10):
-				#for source_gene in range(0,10):
-				self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
-				if(self.nodes[t,target_gene]>0):
-					self.nodes[t,target_gene]=1
-				elif(self.nodes[t,target_gene]==0):
-					self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
-				else:
-					self.nodes[t,target_gene]=-1
-			if(not np.array_equal(self.nodes[t-1,:],self.nodes[t,:])):
-				changed=True
+		
+		for target_gene in range(0,10):
+			#for source_gene in range(0,10):
+			self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
+			if(self.nodes[t,target_gene]>0):
+				self.nodes[t,target_gene]=1
+			elif(self.nodes[t,target_gene]==0):
+				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
 			else:
-				reached_attractor=True
-				#print "reached attractor at time: ",t
-
-			t+=1
-			
-		return changed
+				self.nodes[t,target_gene]=-1
+		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
 	def visualize_state(self):
 		'''
