@@ -129,11 +129,11 @@ class GRN(object):
 		'''
 		Runs one iteration of network interactions, a single timestep
 		As described on page 2 of the original paper, in 'Model'
-		Returns a boolean, true if there is no change in network state: has reached a 
+		Returns a boolean, false if there is no change in network state: has reached a 
 		stable attractor.
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
-		
+
 		for target_gene in range(0,10):
 			#for source_gene in range(0,10):
 			self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
@@ -143,6 +143,8 @@ class GRN(object):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
 			else:
 				self.nodes[t,target_gene]=-1
+		# print self.nodes
+		# temp = raw_input("enter to continue")
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
 	def visualize_state(self):

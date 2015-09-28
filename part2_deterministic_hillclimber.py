@@ -59,6 +59,7 @@ def evaluate(individual, max_cycle, target_attractor,p):
 	fitness_values = list()
 
 	for initial_state in start_attractors:
+		individual.nodes=np.zeros(individual.nodes.shape)
 		individual.nodes[0]=initial_state
 		counter = 1
 		while(counter <= max_cycle and individual.update_state(counter)):
@@ -100,10 +101,10 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 		population.append(model.GRN(target,max_cycle,initial_edges))
 
 
+	print population[0].edges
 	#Find fitness for each individual:
 	for individual in population:
-			individual.fitness = evaluate(individual,max_cycle,target,mu)
-
+		individual.fitness = evaluate(individual,max_cycle,target,mu)
 	print "initial fitness of network: "+str(individual.fitness)
 	#evolutionary loop is initiated:
 	best = population[0]
@@ -150,7 +151,7 @@ def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 10
+	generations = 1
 	mu = 0.05
 	p=0.15
 	parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p)
