@@ -59,14 +59,14 @@ def evaluate(individual, max_cycle, target_attractor,p):
 	fitness_values = list()
 
 	for initial_state in start_attractors:
-		individual.nodes=initial_state
+		individual.nodes[0]=initial_state
 		counter = 0
 		while(counter <= max_cycle and individual.update_state()):
 			counter += 1
 
 		if(counter <= max_cycle):
 			#stable, not chaotic or cyclic
-			ham = hamming(individual.nodes,target_attractor)
+			ham = hamming(individual.nodes[0],target_attractor)
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
 			fitness_values.append(this_fitness)
 		else:
@@ -97,7 +97,7 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	initial_edges = model.GRN.initialize_edges(network_size,network_size)
 	population=list()
 	for i in range(pop_size):
-		population.append(model.GRN(target,initial_edges))
+		population.append(model.GRN(target,max_cycle,initial_edges))
 
 
 	#Find fitness for each individual:

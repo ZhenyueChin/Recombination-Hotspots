@@ -11,13 +11,13 @@ class GRN(object):
 	between nodes. 
 	'''
 
-	def __init__(self, n, e):
+	def __init__(self, n, max_cycles, e):
 		'''
 		todo: In the paper, how the initial population is formed is not entirely clear.
 		are we supposed to have 100 clones of a single random network for the initial population, 
 		or 100 random networks?
 		'''
-		self.nodes = n
+		self.nodes = GRN.matrix_create(max_cycles,n)
 		self.edges = e
 		self.fitness = -1
 
@@ -29,7 +29,7 @@ class GRN(object):
 		deep copy
 		'''
 		#print type(GRN(len(self.nodes),self.edges.copy()))
-		return GRN(self.nodes,self.edges.copy())
+		return GRN(np.copy(self.nodes[0]),self.nodes.shape[1],np.copy(self.edges))
 
 	def measure_modularity(self):
 		'''
@@ -37,13 +37,13 @@ class GRN(object):
 		'''
 		
 	@staticmethod
-	def matrix_create(rows, columns):
+	def matrix_create(rows, first_row):
 		'''
 		Initializes a 2D zero np matrix
 		'''
-
-		return np.matrix(np.zeros(rows*columns).reshape(rows,columns))
-
+		mat = np.array(np.zeros(rows*len(first_row)).reshape(rows,len(first_row)))
+		mat[0]=first_row
+		return mat
 	@staticmethod
 	def initialize_edges(m, n):
 		'''
@@ -52,6 +52,7 @@ class GRN(object):
 		As in the original paper, 20 connections will have random interactions to start.
 		'''
 
+		
 		#generate 20 unique random indexes
 		#TODO: find a cooler way to do this, or at least use generator
 		seen = set()
@@ -63,8 +64,8 @@ class GRN(object):
 				x, y = rand.randint(0, m-1), rand.randint(0, n-1)
 			seen.add((x,y))
 
-	    #initialize matrix
-		e = GRN.matrix_create(m, n)
+		#initialize matrix
+		e = GRN.matrix_create(m, np.zeros(n))
 
 	    #apply random interactions to unique indexes
 		for pair in seen:
@@ -79,7 +80,7 @@ class GRN(object):
 		'''
 		Each gene (node) has a chance of mu to mutate
 		'''
-		for i in range(self.nodes.shape[0]):
+		for i in range(self.nodes.shape[1]):
 			if(rand.random()<=mu):
 				#print "mutating gene "+str(i)+"!"
 				self.mutate(i)
@@ -88,7 +89,7 @@ class GRN(object):
 		'''
 		Mutates the specified gene at index i according to the rule specified in page 9 of the original paper
 		'''
-		N = self.nodes.shape[0]									#number of nodes in the network
+		N = self.nodes.shape[1]									#number of nodes in the network
 		r_u = 0  												#number of regulators for this gene
 		for j in range(0,self.edges.shape[0]):
 			if(self.edges[j,i]!=0):  							#if the mutated node is regulated by j
@@ -133,26 +134,28 @@ class GRN(object):
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
 		
-		counter = 0
-		still_active = False
-		influence = 0
-		old_nodes = self.nodes.copy()
-		for regulated_node in range(self.edges.shape[1]):
-			isolated = True 
-			for regulator_node in range(self.edges.shape[0]):
-				edge_influence = (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
-				if(edge_influence!=0): #there are edges feeding in to this node
-					isolated=False
-				influence += edge_influence
+		# counter = 0
+		# still_active = False
+		# influence = 0
+		# old_nodes = self.nodes.copy()
+		# for regulated_node in range(self.edges.shape[1]):
+		# 	isolated = True 
+		# 	for regulator_node in range(self.edges.shape[0]):
+		# 		edge_influence = (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
+		# 		if(edge_influence!=0): #there are edges feeding in to this node
+		# 			isolated=False
+		# 		influence += edge_influence
 
-			if influence > 0:
-				self.nodes[regulated_node] = 1
-			elif(influence <= 0 and not isolated):
-				self.nodes[regulated_node] = -1
-			if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
-				still_active=True
-			influence = 0
-		return still_active
+		# 	if influence > 0:
+		# 		self.nodes[regulated_node] = 1
+		# 	elif(influence <= 0 and not isolated):
+		# 		self.nodes[regulated_node] = -1
+		# 	if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
+		# 		still_active=True
+		# 	influence = 0
+		# return still_active
+		
+		return False
 
 	def visualize_state(self):
 		'''
@@ -180,8 +183,8 @@ class GRN(object):
 		'''
 		active_nodes = []
 		inactive_nodes = []
-		numNeurons = len(self.nodes)
-		neuronPositions=self.matrix_create(numNeurons,2)
+		numNeurons = len(self.nodes[1])
+		neuronPositions=self.matrix_create(numNeurons,np.zeros(2))
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
 		angleUpdate = 2 * pi /numNeurons
