@@ -29,7 +29,7 @@ class GRN(object):
 		deep copy
 		'''
 		#print type(GRN(len(self.nodes),self.edges.copy()))
-		return GRN(np.copy(self.nodes[0]),self.nodes.shape[1],np.copy(self.edges))
+		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges))
 
 	def measure_modularity(self):
 		'''
@@ -133,29 +133,28 @@ class GRN(object):
 		stable attractor.
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
-		
-		# counter = 0
-		# still_active = False
-		# influence = 0
-		# old_nodes = self.nodes.copy()
-		# for regulated_node in range(self.edges.shape[1]):
-		# 	isolated = True 
-		# 	for regulator_node in range(self.edges.shape[0]):
-		# 		edge_influence = (self.edges[regulator_node,regulated_node])*old_nodes[regulator_node]
-		# 		if(edge_influence!=0): #there are edges feeding in to this node
-		# 			isolated=False
-		# 		influence += edge_influence
+		changed=False
+		reached_attractor=False
+		t = 1
+		while(t<20 and not reached_attractor):
+			for target_gene in range(0,10):
+				#for source_gene in range(0,10):
+				self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
+				if(self.nodes[t,target_gene]>0):
+					self.nodes[t,target_gene]=1
+				elif(self.nodes[t,target_gene]==0):
+					self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
+				else:
+					self.nodes[t,target_gene]=-1
+			if(not np.array_equal(self.nodes[t-1,:],self.nodes[t,:])):
+				changed=True
+			else:
+				reached_attractor=True
+				#print "reached attractor at time: ",t
 
-		# 	if influence > 0:
-		# 		self.nodes[regulated_node] = 1
-		# 	elif(influence <= 0 and not isolated):
-		# 		self.nodes[regulated_node] = -1
-		# 	if(old_nodes[regulated_node]!=self.nodes[regulated_node]):
-		# 		still_active=True
-		# 	influence = 0
-		# return still_active
-		
-		return False
+			t+=1
+			
+		return changed
 
 	def visualize_state(self):
 		'''
@@ -183,7 +182,7 @@ class GRN(object):
 		'''
 		active_nodes = []
 		inactive_nodes = []
-		numNeurons = len(self.nodes[1])
+		numNeurons = self.nodes.shape[0]
 		neuronPositions=self.matrix_create(numNeurons,np.zeros(2))
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
