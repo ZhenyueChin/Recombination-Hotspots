@@ -137,9 +137,8 @@ class GRN(object):
 		for target_gene in range(0,10):
 			#for source_gene in range(0,10):
 			#print self.edges[:,target_gene]
-			if(np.array_equal(self.edges[:,target_gene],np.zeros(10))):
+			if(np.count_nonzero(self.edges[:,target_gene])==0):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
-				#print "lonely node!"
 			else:
 				self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
 				if(self.nodes[t,target_gene]>0):

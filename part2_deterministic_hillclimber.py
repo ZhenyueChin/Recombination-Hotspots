@@ -152,7 +152,7 @@ def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
 	pop_size = 1 #parallel climbers
-	generations = 100
+	generations = 1000
 	mu = 0.05
 	p=0.15
 	parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p)
