@@ -67,7 +67,8 @@ def evaluate(individual, max_cycle, target_attractor,p):
 
 		if(counter < max_cycle):
 			#stable, not chaotic or cyclic
-			ham = hamming(individual.nodes[counter],target_attractor)
+			ham = hamming(individual.nodes[counter-1],target_attractor)
+			#print individual.nodes[counter-1]
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
 			fitness_values.append(this_fitness)
 		else:
@@ -149,7 +150,7 @@ def parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p):
 	
 def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
-	max_cycle = 20
+	max_cycle = 30
 	pop_size = 1 #parallel climbers
 	generations = 100
 	mu = 0.05

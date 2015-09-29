@@ -133,7 +133,7 @@ class GRN(object):
 		stable attractor.
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
-
+		#t+=1
 		for target_gene in range(0,10):
 			#for source_gene in range(0,10):
 			#print self.edges[:,target_gene]
@@ -145,7 +145,7 @@ class GRN(object):
 				if(self.nodes[t,target_gene]>0):
 					self.nodes[t,target_gene]=1
 				elif(self.nodes[t,target_gene]==0):
-					self.nodes[t,target_gene]=0#self.nodes[t-1,target_gene]
+					self.nodes[t,target_gene]=-1#self.nodes[t-1,target_gene]
 				else:
 					self.nodes[t,target_gene]=-1
 		# print self.nodes
