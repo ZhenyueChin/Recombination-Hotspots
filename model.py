@@ -136,13 +136,18 @@ class GRN(object):
 
 		for target_gene in range(0,10):
 			#for source_gene in range(0,10):
-			self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
-			if(self.nodes[t,target_gene]>0):
-				self.nodes[t,target_gene]=1
-			elif(self.nodes[t,target_gene]==0):
+			#print self.edges[:,target_gene]
+			if(np.array_equal(self.edges[:,target_gene],np.zeros(10))):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
+				#print "lonely node!"
 			else:
-				self.nodes[t,target_gene]=-1
+				self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
+				if(self.nodes[t,target_gene]>0):
+					self.nodes[t,target_gene]=1
+				elif(self.nodes[t,target_gene]==0):
+					self.nodes[t,target_gene]=0#self.nodes[t-1,target_gene]
+				else:
+					self.nodes[t,target_gene]=-1
 		# print self.nodes
 		# temp = raw_input("enter to continue")
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))

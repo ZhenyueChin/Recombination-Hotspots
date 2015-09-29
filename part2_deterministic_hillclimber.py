@@ -62,12 +62,12 @@ def evaluate(individual, max_cycle, target_attractor,p):
 		individual.nodes=np.zeros(individual.nodes.shape)
 		individual.nodes[0]=initial_state
 		counter = 1
-		while(counter <= max_cycle and individual.update_state(counter)):
+		while(counter < max_cycle and individual.update_state(counter)):
 			counter += 1
 
-		if(counter <= max_cycle):
+		if(counter < max_cycle):
 			#stable, not chaotic or cyclic
-			ham = hamming(individual.nodes[0],target_attractor)
+			ham = hamming(individual.nodes[counter],target_attractor)
 			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
 			fitness_values.append(this_fitness)
 		else:
@@ -151,7 +151,7 @@ def test_hill_climber():
 	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 1 #parallel climbers
-	generations = 1
+	generations = 100
 	mu = 0.05
 	p=0.15
 	parallel_hill_climber(target, max_cycle, pop_size, generations,mu,p)
@@ -160,4 +160,5 @@ def test_hill_climber():
 def main():
 	rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
 	test_hill_climber()
+
 main()
