@@ -41,7 +41,7 @@ class GRN(object):
 		'''
 		Initializes a 2D zero np matrix
 		'''
-		mat = np.array(np.zeros(rows*len(first_row)).reshape(rows,len(first_row)))
+		mat = np.matrix(np.zeros(rows*len(first_row)).reshape(rows,len(first_row)))
 		mat[0]=first_row
 		return mat
 	@staticmethod
@@ -134,6 +134,17 @@ class GRN(object):
 		Accepts a maximum number of iterations (to handle possible chaotic states)
 		'''
 		#t+=1
+		# print np.matrix(self.nodes[t]).shape
+		# print self.edges.shape
+		self.nodes[t,:]=np.matrix(self.nodes[t-1,:])*self.edges
+		print "\n",self.nodes[t,:]
+		self.nodes[t,:]= np.clip(self.nodes[t,:],-1,1)
+		print self.nodes[t,:]
+		self.nodes[t,:][self.nodes[t,:] == 0] = -1
+		print self.nodes[t,:]
+		#print self.nodes
+		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
+
 		for target_gene in range(0,10):
 			#for source_gene in range(0,10):
 			#print self.edges[:,target_gene]
@@ -228,7 +239,7 @@ class GRN(object):
 		
 
 # def main():
-# 	grn = GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]))
+# 	grn = GRN(np.matrix([-1,1,-1,1,-1,1,-1,1,-1,1]))
 # 	for i in range(0,100):
 # 		grn.update_state()
 # 		#print grn.edges
