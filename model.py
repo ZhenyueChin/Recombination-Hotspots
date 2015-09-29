@@ -129,37 +129,20 @@ class GRN(object):
 		'''
 		Runs one iteration of network interactions, a single timestep
 		As described on page 2 of the original paper, in 'Model'
-		Returns a boolean, false if there is no change in network state: has reached a 
-		stable attractor.
-		Accepts a maximum number of iterations (to handle possible chaotic states)
+		Returns a boolean: false if there is no change in network state (has reached a 
+		stable attractor).
 		'''
-		#t+=1
-		# print np.matrix(self.nodes[t]).shape
-		# print self.edges.shape
-		self.nodes[t,:]=np.matrix(self.nodes[t-1,:])*self.edges
-		print "\n",self.nodes[t,:]
-		self.nodes[t,:]= np.clip(self.nodes[t,:],-1,1)
-		print self.nodes[t,:]
-		self.nodes[t,:][self.nodes[t,:] == 0] = -1
-		print self.nodes[t,:]
-		#print self.nodes
-		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
+		#efficient matrix manipulation, mis-represents nodes with no inputs:
+		self.nodes[t,:] = np.matrix(self.nodes[t-1,:])*self.edges
+		self.nodes[t,:] = np.clip(self.nodes[t,:],-1,1)
+		self.nodes[t,:][self.nodes[t,:] == 0] = -1
+
+		#check for nodes with no inputs:
 		for target_gene in range(0,10):
-			#for source_gene in range(0,10):
-			#print self.edges[:,target_gene]
 			if(np.count_nonzero(self.edges[:,target_gene])==0):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
-			else:
-				self.nodes[t,target_gene]=sum(self.nodes[t-1,:]*self.edges[:,target_gene])
-				if(self.nodes[t,target_gene]>0):
-					self.nodes[t,target_gene]=1
-				elif(self.nodes[t,target_gene]==0):
-					self.nodes[t,target_gene]=-1#self.nodes[t-1,target_gene]
-				else:
-					self.nodes[t,target_gene]=-1
-		# print self.nodes
-		# temp = raw_input("enter to continue")
+
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
 	def visualize_state(self):
