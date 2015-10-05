@@ -153,18 +153,27 @@ class GRN(object):
 		plt.imshow(np.reshape(self.nodes, (-1, 1)), cmap=plt.cm.gray, aspect='auto',interpolation='nearest',origin='left')
 		plt.show()
 
-	def rectangle_visualization(self,initial_state,target, title):
+	def rectangle_visualization(self,initial_states,target, title):
 		'''
 		Shows the network behavior by timestep, with target
 		'''
-
-		self.nodes=np.zeros(self.nodes.shape)
-		self.nodes[0]=initial_state
-		counter = 1
-		while(counter < self.nodes.shape[1] and self.update_state(counter)):
-			counter += 1
-		plt.imshow(np.append(self.nodes,[target],axis=0), cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
+		num_columns=-1
+		if(num_columns<0):
+			num_columns=int((math.sqrt(len(initial_states))))
+		print num_columns
 		plt.title(title,fontsize=20)
+		for i in range(len(initial_states)):
+			plt.subplot(len(initial_states)/num_columns+1,num_columns,i+1)
+			self.nodes=np.zeros(self.nodes.shape)
+			self.nodes[0]=initial_states[i]
+			counter = 1
+			while(counter < self.nodes.shape[1] and self.update_state(counter)):
+				counter += 1
+			plt.imshow(np.append(self.nodes,[target],axis=0), cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
+			plt.gca().axes.get_xaxis().set_visible(False)
+
+		plt.subplot(len(initial_states)/num_columns+1,num_columns,2)
+		plt.title(title)
 		plt.show()
 
 	def shorten_line(self,x,y):

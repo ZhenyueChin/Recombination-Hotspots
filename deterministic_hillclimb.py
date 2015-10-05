@@ -191,8 +191,23 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
  		pickle.dump(best, handle)
  	print "networks evaluated: " , len(population)*generations 
  	print "Best network saved in best_network.pickle for further study"
-	best.rectangle_visualization(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA, "Target A")
-	best.rectangle_visualization(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetB, "Target B")	
+	
+ 	start_attractors = [
+						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
+						]
+
+	best.rectangle_visualization(start_attractors,targetA, "Target A")
+
 	temp = raw_input("enter to end")
 	
 
@@ -207,7 +222,7 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 
 def test_hill_climber():
 	targetA        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
-	targetB        = np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])
+	targetB        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
 	pop_size = 5 #parallel climbers
 	generations_per_pattern = 1000
