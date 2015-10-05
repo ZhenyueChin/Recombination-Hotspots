@@ -151,10 +151,11 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 	print "networks evaluated: " , len(population)*generations 
 	print "Now we apply evolutionary pressure for pattern two"
 
+
 	#Find fitness for each individual:
 	for individual in population:
 		individual.fitness = evaluate_double(individual,max_cycle,targetA,targetB)
-
+	best=population[0]
 	for gen in range(generations):
 		
 		#each network is evaluated
@@ -190,14 +191,26 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
  		pickle.dump(best, handle)
  	print "networks evaluated: " , len(population)*generations 
  	print "Best network saved in best_network.pickle for further study"
+	best.rectangle_visualization(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA, "Target A")
+	best.rectangle_visualization(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetB, "Target B")	
+	temp = raw_input("enter to end")
 	
-	
+
+
+
+
+
+
+
+
+
+
 def test_hill_climber():
 	targetA        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	targetB        = np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])
-	max_cycle = 30
+	max_cycle = 20
 	pop_size = 5 #parallel climbers
-	generations_per_pattern = 100
+	generations_per_pattern = 1000
 	mu = 0.05
 	p=0.15
 	det_hillclimb(targetA, targetB, max_cycle, pop_size, generations_per_pattern,mu,p)

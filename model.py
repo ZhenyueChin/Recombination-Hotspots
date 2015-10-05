@@ -152,6 +152,21 @@ class GRN(object):
 
 		plt.imshow(np.reshape(self.nodes, (-1, 1)), cmap=plt.cm.gray, aspect='auto',interpolation='nearest',origin='left')
 		plt.show()
+
+	def rectangle_visualization(self,initial_state,target, title):
+		'''
+		Shows the network behavior by timestep, with target
+		'''
+
+		self.nodes=np.zeros(self.nodes.shape)
+		self.nodes[0]=initial_state
+		counter = 1
+		while(counter < self.nodes.shape[1] and self.update_state(counter)):
+			counter += 1
+		plt.imshow(np.append(self.nodes,[target],axis=0), cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
+		plt.title(title,fontsize=20)
+		plt.show()
+
 	def shorten_line(self,x,y):
 		'''
 		Does some nasty geometry to find proper x' , y' to shorten arrows appropriately in graphical representation of network
