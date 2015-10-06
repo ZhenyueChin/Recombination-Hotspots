@@ -2,6 +2,7 @@
 from scipy import *
 import random as rand
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 
 class GRN(object):
@@ -145,14 +146,6 @@ class GRN(object):
 
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
-	def visualize_state(self):
-		'''
-		Shows the current activation state of the 10 genes
-		'''
-
-		plt.imshow(np.reshape(self.nodes, (-1, 1)), cmap=plt.cm.gray, aspect='auto',interpolation='nearest',origin='left')
-		plt.show()
-
 	def rectangle_visualization(self,initial_states,target, title):
 		'''
 		Shows the network behavior by timestep, with target
@@ -189,13 +182,16 @@ class GRN(object):
 		x_prime= ((x*1.0)/y)*y_prime
 		return x_prime,y_prime
 
-	def visualize_network(self):
+	def visualize_network(self,start_state,target_state,max_cycle):
 		'''
-		Shows the network as a node-edge graph
+		Shows the network as a node-edge graph over time
 		'''
+		self.nodes=np.zeros(self.nodes.shape)
+		self.nodes[0]=start_state
+		print self.nodes
 		active_nodes = []
 		inactive_nodes = []
-		numNeurons = self.nodes.shape[0]
+		numNeurons = self.nodes.shape[1]
 		neuronPositions=self.matrix_create(numNeurons,np.zeros(2))
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
@@ -208,41 +204,56 @@ class GRN(object):
 			neuronPositions[i,0]=x
 			neuronPositions[i,1]=y
 
-		#draw straight connections (non-reccurent)	
-		for i in range(0,numNeurons):
-			for other in range(0,neuronPositions.shape[0]):
-				#w = int(10*abs(synapseValues[i,other]))+1
-				if(self.edges[i,other]!=0):
-				
-					if self.edges[i,other]>0:
+		counter=0
+		plt.ion()
+		plt.show()
+
+		while(counter < max_cycle and self.update_state(counter)):
+			
+			#draw straight connections (non-reccurent)	
+			for i in range(0,numNeurons):
+				for other in range(0,neuronPositions.shape[0]):
+					#w = int(10*abs(synapseValues[i,other]))+1
+					if(self.edges[i,other]!=0):
+					
+						if self.edges[i,other]>0:
+							color = "green"
+						else:
+							color = "red"
+						arrow_x,arrow_y=self.shorten_line((neuronPositions[other,0]-neuronPositions[i,0]),
+								(neuronPositions[other,1]-neuronPositions[i,1]))
+						ax.arrow(neuronPositions[i,0],
+								neuronPositions[i,1], 
+								arrow_x,arrow_y,
+								head_width=0.05, head_length=0.1, fc=color, ec=color)
+								#shape='left')
+
+			for i in range(0,numNeurons):
+				if(self.edges[i,i]!=0): #recurrent connection
+					if self.edges[i,i]>0:
 						color = "green"
 					else:
 						color = "red"
-					arrow_x,arrow_y=self.shorten_line((neuronPositions[other,0]-neuronPositions[i,0]),
-							(neuronPositions[other,1]-neuronPositions[i,1]))
-					ax.arrow(neuronPositions[i,0],
-							neuronPositions[i,1], 
-							arrow_x,arrow_y,
-							head_width=0.05, head_length=0.1, fc=color, ec=color)
-							#shape='left')
-
-		for i in range(0,numNeurons):
-			if(self.edges[i,i]!=0): #recurrent connection
-				if self.edges[i,i]>0:
-					color = "green"
+					plt.plot(neuronPositions[i,0]*1.1,neuronPositions[i,1]*1.1,'ko',markerfacecolor=[1,1,1],markeredgecolor=color,markersize=25)
+				
+				#target state:
+				if(target_state[i]==1):		
+					active_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=20)
 				else:
-					color = "red"
-				plt.plot(neuronPositions[i,0]*1.1,neuronPositions[i,1]*1.1,'ko',markerfacecolor=[1,1,1],markeredgecolor=color,markersize=25)
-			if(self.nodes[i]==1):
-					
-				active_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=18)
-			else:
-					
-				inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=18)
-			ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
-		#plt.legend()
-		plt.axis((-1.5,1.5,-1.5,1.5))
-		plt.show()
+					inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=20)
+				#true neuron state:
+				if(self.nodes[counter,i]==1):		
+					active_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=16)
+				else:
+					inactive_nodes += plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=16)
+				ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
+			
+			counter += 1
+			plt.axis((-1.5,1.5,-1.5,1.5))
+			plt.draw()
+
+			time.sleep(1)
+		print self.nodes
 		
 
 # def main():

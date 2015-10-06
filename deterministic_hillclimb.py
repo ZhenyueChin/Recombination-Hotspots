@@ -149,48 +149,48 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 	if(best.fitness>-1):
 		print "The network that produced the most accurate attractors had fitness: " , best.fitness
 	print "networks evaluated: " , len(population)*generations 
-	print "Now we apply evolutionary pressure for pattern two"
+	# print "Now we apply evolutionary pressure for pattern two"
 
 
-	#Find fitness for each individual:
-	for individual in population:
-		individual.fitness = evaluate_double(individual,max_cycle,targetA,targetB)
-	best=population[0]
-	for gen in range(generations):
+	# #Find fitness for each individual:
+	# for individual in population:
+	# 	individual.fitness = evaluate_double(individual,max_cycle,targetA,targetB)
+	# best=population[0]
+	# for gen in range(generations):
 		
-		#each network is evaluated
-		for individual in range(len(population)):
-			#print "nodes: " , individual.nodes
-			#print "fitness: ",  evaluate(individual,max_cycle,target)
-			child = population[individual].copy()
-			child.perturb(mu)
-			child.fitness = evaluate_double(child,max_cycle,targetA,targetB)
-			#print "child fitness: " , child.fitness
-			if child.fitness > population[individual].fitness:
-				# print child.fitness, " better than: " , individual.fitness
+	# 	#each network is evaluated
+	# 	for individual in range(len(population)):
+	# 		#print "nodes: " , individual.nodes
+	# 		#print "fitness: ",  evaluate(individual,max_cycle,target)
+	# 		child = population[individual].copy()
+	# 		child.perturb(mu)
+	# 		child.fitness = evaluate_double(child,max_cycle,targetA,targetB)
+	# 		#print "child fitness: " , child.fitness
+	# 		if child.fitness > population[individual].fitness:
+	# 			# print child.fitness, " better than: " , individual.fitness
 
-				population[individual] = child
+	# 			population[individual] = child
 
-				if population[individual].fitness > best.fitness:
-					best = population[individual]
-				if(pop_size==1):
-					print "new best with fitness: " , best.fitness
-				else:
-					temp_fits = list()
-					for ind in population:
-						temp_fits.append(("%.2f" % ind.fitness))
+	# 			if population[individual].fitness > best.fitness:
+	# 				best = population[individual]
+	# 			if(pop_size==1):
+	# 				print "new best with fitness: " , best.fitness
+	# 			else:
+	# 				temp_fits = list()
+	# 				for ind in population:
+	# 					temp_fits.append(("%.2f" % ind.fitness))
 
-					sys.stdout.write('\r')
-					sys.stdout.write('    '+str(temp_fits))
+	# 				sys.stdout.write('\r')
+	# 				sys.stdout.write('    '+str(temp_fits))
 
-		update_progress(gen*1.0/(generations-1))
-	print "\nPart two complete!"
-	if(best.fitness>-1):
-		print "The network that produced the most accurate attractors had fitness: " , best.fitness
-	with open('best_network.pickle', 'wb') as handle:
- 		pickle.dump(best, handle)
- 	print "networks evaluated: " , len(population)*generations 
- 	print "Best network saved in best_network.pickle for further study"
+	# 	update_progress(gen*1.0/(generations-1))
+	# print "\nPart two complete!"
+	# if(best.fitness>-1):
+	# 	print "The network that produced the most accurate attractors had fitness: " , best.fitness
+	# with open('best_network.pickle', 'wb') as handle:
+ # 		pickle.dump(best, handle)
+ # 	print "networks evaluated: " , len(population)*generations 
+ # 	print "Best network saved in best_network.pickle for further study"
 	
  	start_attractors = [
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
@@ -207,9 +207,9 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 						]
 
 	best.rectangle_visualization(start_attractors,targetA, "Target A")
-
+	best.visualize_network(np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),targetA,max_cycle)
 	temp = raw_input("enter to end")
-	
+
 
 
 
@@ -224,8 +224,8 @@ def test_hill_climber():
 	targetA        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	targetB        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 20
-	pop_size = 5 #parallel climbers
-	generations_per_pattern = 1000
+	pop_size = 2 #parallel climbers
+	generations_per_pattern = 10
 	mu = 0.05
 	p=0.15
 	det_hillclimb(targetA, targetB, max_cycle, pop_size, generations_per_pattern,mu,p)
