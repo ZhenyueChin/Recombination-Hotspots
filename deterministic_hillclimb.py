@@ -79,7 +79,7 @@ def evaluate_single(individual, max_cycle, target_attractor):
 
 	return my_sum/len(fitness_values)
 
-def evaluate_double(individual, max_cycle, target_attractorA, target_attractorB):
+def evaluate_double(individual, max_cycle, target_attractGirorA, target_attractorB):
 	'''
 	Run evaluate_single on both target attractors
 	'''
@@ -192,6 +192,10 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
  # 	print "networks evaluated: " , len(population)*generations 
  # 	print "Best network saved in best_network.pickle for further study"
 	
+
+
+
+
  	start_attractors = [
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
 						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
@@ -206,9 +210,16 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
 
+
+
+
+
+
 	best.rectangle_visualization(start_attractors,targetA, "Target A")
-	best.visualize_network(np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),targetA,max_cycle)
+	best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
+
 	temp = raw_input("enter to end")
+	# best.measure_modularity()
 
 
 
@@ -221,18 +232,17 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 
 
 def test_hill_climber():
-	targetA        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
-	targetB        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
-	max_cycle = 20
-	pop_size = 2 #parallel climbers
-	generations_per_pattern = 10
+	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	max_cycle = 30
+	pop_size = 1 #parallel climbers
+	generations = 1000
 	mu = 0.05
 	p=0.15
-	det_hillclimb(targetA, targetB, max_cycle, pop_size, generations_per_pattern,mu,p)
+	det_hillclimb(target,target, max_cycle, pop_size, generations,mu,p)
 
 
 def main():
-	#rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
+	rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
 	test_hill_climber()
 
 main()

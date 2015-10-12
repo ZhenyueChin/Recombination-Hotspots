@@ -4,6 +4,8 @@ import random as rand
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+import networkx as nx
+import GirvanNewman
 
 class GRN(object):
 	'''
@@ -35,7 +37,15 @@ class GRN(object):
 	def measure_modularity(self):
 		'''
 		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
+		by first converting it to a networkx graph
 		'''
+		rows, cols = np.where(self.edges != 0)
+		edges = zip(rows.tolist(), cols.tolist())
+		print edges
+		gr = nx.Graph()
+		gr.add_edges_from(edges)
+		gn = GirvanNewman.Modularity(gr)
+	
 		
 	@staticmethod
 	def matrix_create(rows, first_row):
@@ -160,7 +170,7 @@ class GRN(object):
 			self.nodes=np.zeros(self.nodes.shape)
 			self.nodes[0]=initial_states[i]
 			counter = 1
-			while(counter < self.nodes.shape[1] and self.update_state(counter)):
+			while(counter < self.nodes.shape[0] and self.update_state(counter)):
 				counter += 1
 			plt.imshow(np.append(self.nodes,[target],axis=0), cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
 			plt.gca().axes.get_xaxis().set_visible(False)
@@ -188,7 +198,7 @@ class GRN(object):
 		'''
 		self.nodes=np.zeros(self.nodes.shape)
 		self.nodes[0]=start_state
-		print self.nodes
+		# print self.nodes
 		active_nodes = []
 		inactive_nodes = []
 		numNeurons = self.nodes.shape[1]
@@ -207,9 +217,10 @@ class GRN(object):
 		counter=0
 		plt.ion()
 		plt.show()
-
-		while(counter < max_cycle and self.update_state(counter)):
+		active=True
+		while(active):
 			
+			plt.cla()
 			#draw straight connections (non-reccurent)	
 			for i in range(0,numNeurons):
 				for other in range(0,neuronPositions.shape[0]):
@@ -251,9 +262,9 @@ class GRN(object):
 			counter += 1
 			plt.axis((-1.5,1.5,-1.5,1.5))
 			plt.draw()
-
-			time.sleep(1)
-		print self.nodes
+			time.sleep(0.8)
+			active = (counter < max_cycle and self.update_state(counter))
+		# print self.nodes
 		
 
 # def main():
