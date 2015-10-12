@@ -6,6 +6,7 @@ import time
 import matplotlib.pyplot as plt
 import networkx as nx
 import GirvanNewman
+import community
 
 class GRN(object):
 	'''
@@ -44,7 +45,9 @@ class GRN(object):
 		print edges
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
-		gn = GirvanNewman.Modularity(gr)
+		partition = community.best_partition(G)
+		print community.modularity(partition)
+		return community.modularity(partition)
 	
 		
 	@staticmethod
