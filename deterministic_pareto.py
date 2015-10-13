@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import model
 import sys
 import pickle
+import time
 
 
 def hamming(attractor, target):
@@ -88,6 +89,36 @@ def evaluate_double(individual, max_cycle, target_attractGirorA, target_attracto
 	fitness+=evaluate_single(individual, max_cycle, target_attractorB)
 	return fitness/2.0
 
+def total_tournament(population,eliminated):
+	'''
+	a test tournament function (sanity check) which removes ALL dominated individuals
+	'''
+	for other in population:
+		for contender in population:
+			#print contcount,othercount
+			if((not other is contender) and other.genetic_age<=contender.genetic_age and other.fitness>=contender.fitness): #contender has been dominated
+				#print "individual with age: ",contender.genetic_age," and fitness: ",contender.fitness," dominated by other with age: ",other.genetic_age," and fitness: ",other.fitness
+				eliminated.append(contender)
+				population.remove(contender)
+
+def tournament(population,contenders,eliminated):
+	'''
+	given a set of individuals, discard those individuals that are dominated by the set of contenders
+	and remove them from the population
+	TODO: optimize this function
+	'''
+	#print len(population)
+	for contender in contenders:
+		for other in contenders:
+			#print contcount,othercount
+			if((not other is contender) and other.genetic_age<=contender.genetic_age and other.fitness>=contender.fitness): #contender has been dominated
+				#print "individual with age: ",contender.genetic_age," and fitness: ",contender.fitness," dominated by other with age: ",other.genetic_age," and fitness: ",other.fitness
+				eliminated.append(contender)
+				population.remove(contender)
+				return
+	print "no domination"
+	
+
 def update_progress(i):
 	'''
 	updates a timer in the terminal
@@ -96,19 +127,51 @@ def update_progress(i):
 	sys.stdout.write("\r%.0f%%" % (i*100))
 	sys.stdout.flush()
 
-def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
+def entirely_non_dominated(population):
 	'''
-	As a very simple first step, I will evolve populations of GRNs mirroring the initial results
-	"Specialization Increases Modularity" in the original paper, but using a hill climber evolutionary
-	algorithm
+	checks to see if the set of nondominated individuals is equal in size to the population set
 	'''
+	return False
+def pareto_visualization(population,eliminated):
+	'''
+	visualize the pareto front as evolution goes along
+	'''
+	
+	ages_pop=list()
+	fitnesses_pop=list()
+	ages_elim=list()
+	fitnesses_elim=list()
+	for individual in population:
+		ages_pop.append(individual.genetic_age)
+		fitnesses_pop.append(individual.fitness)
+	for individual in eliminated:
+		ages_elim.append(individual.genetic_age)
+		fitnesses_elim.append(individual.fitness)
+	#print ages,fitnesses
+	plt.cla()
 
+	plt.axis((0,100,0,1.5))
+	plt.ylabel('Fitness')
+	plt.xlabel('Age')
+	plt.plot(ages_pop,fitnesses_pop,"bo")
+	plt.plot(ages_elim,fitnesses_elim,"rx")
+	plt.draw()
+	time.sleep(0.5)
+
+def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
+	'''
+	I will evolve populations of GRNs mirroring the initial results
+	"Specialization Increases Modularity" in the original paper, but using an
+	Age-Fitenss Pareto Optimization algorithm, and deterministic start attractors
+	'''
+	plt.ion()
+	plt.show()
 	#initial network: 200 networks with identical randomized edges:
 	network_size = len(targetA)
 	initial_edges = model.GRN.initialize_edges(network_size,network_size)
 	population=list()
 	for i in range(pop_size):
-		population.append(model.GRN(targetA,max_cycle,initial_edges))
+		population.append(model.GRN(targetA,max_cycle)) #not identical
 
 	#Find fitness for each individual:
 	for individual in population:
@@ -117,34 +180,46 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 
 	#evolutionary loop is initiated:
 	best = population[0]
-	#best.fitness=-1
+
 	for gen in range(generations):
 		
-		#each network is evaluated
-		for individual in range(len(population)):
-			#print "nodes: " , individual.nodes
-			#print "fitness: ",  evaluate(individual,max_cycle,target)
-			child = population[individual].copy()
+		#each network is evaluated, and mutated
+		next_gen = []
+		for individual in population:
+			individual.genetic_age+=1
+			child = individual.copy()
 			child.perturb(mu)
 			child.fitness = evaluate_single(child,max_cycle,targetA)
-			#print "child fitness: " , child.fitness
-			if child.fitness > population[individual].fitness:
-				# print child.fitness, " better than: " , individual.fitness
+			if child.fitness > best.fitness:
+				best = child
+				print "new best with fitness: ",best.fitness
+			next_gen.append(child)
+		population.extend(next_gen)
+		
+		#one extra random network is added at zero age:
+		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
+		new_individual.fitness = evaluate_single(new_individual,max_cycle,targetA)
+		population.append(new_individual)
 
-				population[individual] = child
-
-				if population[individual].fitness > best.fitness:
-					best = population[individual]
-				if(pop_size==1):
-					print "new best with fitness: " , best.fitness
-				else:
-					temp_fits = list()
-					for ind in population:
-						temp_fits.append(("%.2f" % ind.fitness))
-
-					sys.stdout.write('\r')
-					sys.stdout.write('    '+str(temp_fits))
+		#now our population is of size 2k+1, time for tournaments:
+		#while(len(population)>pop_size):
+		eliminated = []
+		#individualA = random.choice(population)
+		#individualB = random.choice(population)
+		total_tournament(population,eliminated)
+		#tournament(population,{individualA,individualB},eliminated)
+		pareto_visualization(population,eliminated)
+		if(entirely_non_dominated(population)):
+			pop_size=len(population)
+			print "entirely_non_dominated"
+ 
 		update_progress(gen*1.0/(generations-1))
+		
+		#pareto_visualization(population,eliminated)
+
+		
+
+
 	print "\nPart one complete!"
 	if(best.fitness>-1):
 		print "The network that produced the most accurate attractors had fitness: " , best.fitness
@@ -169,7 +244,6 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 	best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
 
 	temp = raw_input("enter to end")
-	# best.measure_modularity()
 
 
 
@@ -180,19 +254,18 @@ def det_hillclimb(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 
 
 
-
-def test_hill_climber():
-	target        = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+def test_pareto():
+	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
-	pop_size = 1 #parallel climbers
+	pop_size =50 #target number of nondominated individuals
 	generations = 1000
 	mu = 0.05
 	p=0.15
-	det_hillclimb(target,target, max_cycle, pop_size, generations,mu,p)
+	det_pareto(target,target, max_cycle, pop_size, generations,mu,p)
 
 
 def main():
-	rand.seed("hppufaejfpaoiwejfilwjef;iljfw") #for safety-harness
-	test_hill_climber()
+	#rand.seed("thisisaseed") #for safety-harness
+	test_pareto()
 
 main()

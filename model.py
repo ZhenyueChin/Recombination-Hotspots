@@ -5,7 +5,6 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import networkx as nx
-import GirvanNewman
 import community
 
 class GRN(object):
@@ -15,15 +14,20 @@ class GRN(object):
 	between nodes. 
 	'''
 
-	def __init__(self, n, max_cycles, e):
+	def __init__(self, n, max_cycles, e = [], age = 0):
 		'''
 		todo: In the paper, how the initial population is formed is not entirely clear.
 		are we supposed to have 100 clones of a single random network for the initial population, 
 		or 100 random networks?
 		'''
+
 		self.nodes = GRN.matrix_create(max_cycles,n)
-		self.edges = e
+		if(e==[]):
+			self.edges = self.initialize_edges(len(n),len(n))
+		else:
+			self.edges = e
 		self.fitness = -1
+		self.genetic_age=age
 
 	def __str__(self):
 		return "\n"+str(self.edges)+"\n"
@@ -32,8 +36,7 @@ class GRN(object):
 		'''
 		deep copy
 		'''
-		#print type(GRN(len(self.nodes),self.edges.copy()))
-		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges))
+		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age)
 
 	def measure_modularity(self):
 		'''
@@ -42,7 +45,6 @@ class GRN(object):
 		'''
 		rows, cols = np.where(self.edges != 0)
 		edges = zip(rows.tolist(), cols.tolist())
-		print edges
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
 		partition = community.best_partition(G)
@@ -159,6 +161,7 @@ class GRN(object):
 
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
 
+
 	def rectangle_visualization(self,initial_states,target, title):
 		'''
 		Shows the network behavior by timestep, with target
@@ -205,6 +208,8 @@ class GRN(object):
 		active_nodes = []
 		inactive_nodes = []
 		numNeurons = self.nodes.shape[1]
+
+		print "from vis_net"
 		neuronPositions=self.matrix_create(numNeurons,np.zeros(2))
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
