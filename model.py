@@ -166,6 +166,7 @@ class GRN(object):
 		'''
 		Shows the network behavior by timestep, with target
 		'''
+		print "Rectangle Visualization"
 		num_columns=-1
 		if(num_columns<0):
 			num_columns=int((math.sqrt(len(initial_states))))
@@ -209,7 +210,6 @@ class GRN(object):
 		inactive_nodes = []
 		numNeurons = self.nodes.shape[1]
 
-		print "from vis_net"
 		neuronPositions=self.matrix_create(numNeurons,np.zeros(2))
 		#compute positions of neurons for the circular visualization
 		angle = 0.0
@@ -270,7 +270,7 @@ class GRN(object):
 			counter += 1
 			plt.axis((-1.5,1.5,-1.5,1.5))
 			plt.draw()
-			time.sleep(0.8)
+			time.sleep(0.5)
 			active = (counter < max_cycle and self.update_state(counter))
 		# print self.nodes
 		

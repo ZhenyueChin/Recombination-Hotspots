@@ -120,6 +120,34 @@ def entirely_non_dominated(population):
 	checks to see if the set of nondominated individuals is equal in size to the population set
 	'''
 	return False
+
+def complete(best,population,generations,targetA,max_cycle):
+
+	print "\nPart one complete!"
+	if(best.fitness>-1):
+		print "The network that produced the most accurate attractors had fitness: " , best.fitness
+	print "networks evaluated: " , len(population)*generations 
+	# print "Now we apply evolutionary pressure for pattern two"
+
+ 	start_attractors = [
+						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
+						]
+
+	#best.rectangle_visualization(start_attractors,targetA, "Target A")
+	#best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
+
+	pickle.dump( best, open( "best_network.pickle", "wb" ) )
+	temp = raw_input("Best network saved in best_network.pickle. Press enter to end")
 def pareto_visualization(population,eliminated):
 	'''
 	visualize the pareto front as evolution goes along
@@ -188,9 +216,17 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
 		new_individual.fitness = evaluate_single(new_individual,max_cycle,targetA)
 		population.append(new_individual)
+		if new_individual.fitness > best.fitness:
+				best = new_individual
+				print "new best with fitness: ",best.fitness
+
+		#check for termination:
+		if(best.fitness==1):
+			print "optimal fitness found"
+			complete(best,population,generations,targetA,max_cycle)
+			break
 
 		#now our population is of size 2k+1, time for tournaments:
-
 		eliminated = []
 		while(len(population)>pop_size):
 			individualA = random.choice(population)
@@ -207,37 +243,6 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 		#pareto_visualization(population,eliminated)
 
 		
-
-
-	print "\nPart one complete!"
-	if(best.fitness>-1):
-		print "The network that produced the most accurate attractors had fitness: " , best.fitness
-	print "networks evaluated: " , len(population)*generations 
-	# print "Now we apply evolutionary pressure for pattern two"
-
- 	start_attractors = [
-						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
-						]
-
-	best.rectangle_visualization(start_attractors,targetA, "Target A")
-	best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
-
-	temp = raw_input("enter to end")
-
-
-
-
-
 
 
 

@@ -89,6 +89,17 @@ def evaluate_double(individual, max_cycle, target_attractGirorA, target_attracto
 	fitness+=evaluate_single(individual, max_cycle, target_attractorB)
 	return fitness/2.0
 
+def total_tournament(population,eliminated):
+	'''
+	a test tournament function (sanity check) which removes ALL dominated individuals
+	'''
+	for other in population:
+		for contender in population:
+			#print contcount,othercount
+			if((not other is contender) and other.genetic_age<=contender.genetic_age and other.fitness>=contender.fitness): #contender has been dominated
+				#print "individual with age: ",contender.genetic_age," and fitness: ",contender.fitness," dominated by other with age: ",other.genetic_age," and fitness: ",other.fitness
+				eliminated.append(contender)
+				population.remove(contender)
 
 def tournament(population,contenders,eliminated):
 	'''
@@ -105,6 +116,7 @@ def tournament(population,contenders,eliminated):
 				eliminated.append(contender)
 				population.remove(contender)
 				return
+	print "no domination"
 	
 
 def update_progress(i):
@@ -188,20 +200,26 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
 		new_individual.fitness = evaluate_single(new_individual,max_cycle,targetA)
 		population.append(new_individual)
+		if new_individual.fitness > best.fitness:
+				best = new_individual
+				print "new best with fitness: ",best.fitness
 
+		#check for termination:
+		if(best.fitness==1):
+			print "optimal fitness found"
+			break
 		#now our population is of size 2k+1, time for tournaments:
-
+		#while(len(population)>pop_size):
 		eliminated = []
-		while(len(population)>pop_size):
-			individualA = random.choice(population)
-			individualB = random.choice(population)
-			#total_tournament(population,eliminated)
-			tournament(population,{individualA,individualB},eliminated)
-			
-			if(entirely_non_dominated(population)):
-				pop_size=len(population)
-				print "entirely_non_dominated"
- 		pareto_visualization(population,eliminated)
+		#individualA = random.choice(population)
+		#individualB = random.choice(population)
+		total_tournament(population,eliminated)
+		#tournament(population,{individualA,individualB},eliminated)
+		pareto_visualization(population,eliminated)
+		if(entirely_non_dominated(population)):
+			pop_size=len(population)
+			print "entirely_non_dominated"
+ 
 		update_progress(gen*1.0/(generations-1))
 		print " Population size: ",len(population)
 		#pareto_visualization(population,eliminated)
@@ -246,9 +264,9 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 def test_pareto():
 	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
-	pop_size =100 #target number of nondominated individuals
+	pop_size =50 #target number of nondominated individuals
 	generations = 1000
-	mu = 0.25
+	mu = 0.05
 	p=0.15
 	det_pareto(target,target, max_cycle, pop_size, generations,mu,p)
 
