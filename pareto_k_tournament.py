@@ -126,7 +126,7 @@ def complete(best,population,generations,targetA,max_cycle):
 	print "\nPart one complete!"
 	if(best.fitness>-1):
 		print "The network that produced the most accurate attractors had fitness: " , best.fitness
-	print "networks evaluated: " , len(population)*generations 
+	print "networks evaluated: " , len(population)*generations+generations 
 	# print "Now we apply evolutionary pressure for pattern two"
 
  	start_attractors = [
@@ -223,7 +223,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 		#check for termination:
 		if(best.fitness==1):
 			print "optimal fitness found"
-			complete(best,population,generations,targetA,max_cycle)
+			complete(best,population,gen,targetA,max_cycle)
 			break
 
 		#now our population is of size 2k+1, time for tournaments:
@@ -251,7 +251,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 def test_pareto():
 	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
-	pop_size =100 #target number of nondominated individuals
+	pop_size =50 #target number of nondominated individuals
 	generations = 1000
 	mu = 0.25
 	p=0.15
@@ -259,7 +259,7 @@ def test_pareto():
 
 
 def main():
-	#rand.seed("thisisaseed") #for safety-harness
+	#rand.seed("this is a seed") #for safety-harness
 	test_pareto()
 
 main()
