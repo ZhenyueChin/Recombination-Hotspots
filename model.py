@@ -44,12 +44,13 @@ class GRN(object):
 		by first converting it to a networkx graph
 		'''
 		rows, cols = np.where(self.edges != 0)
+		#print rows.tolist()
 		edges = zip(rows.tolist(), cols.tolist())
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
-		partition = community.best_partition(G)
-		print community.modularity(partition)
-		return community.modularity(partition)
+		partition = community.best_partition(gr)
+		#print community.modularity(partition)
+		return community.modularity(partition,gr)
 	
 		
 	@staticmethod

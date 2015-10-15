@@ -57,6 +57,19 @@ def evaluate_single(individual, max_cycle, target_attractor):
 						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
 						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
+	start_attractorsB = [
+						np.array([-1,1,-1,1,-1,1,-1,1,-1,-1]),
+						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([-1,-1,-1,1,-1,1,-1,1,-1,1]),
+						np.array([-1,-1,1,1,-1,1,-1,1,-1,1]),
+						np.array([-1,-1,1,-1,-1,1,-1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,1,-1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
+						]
 	fitness_values = list()
 
 	for initial_state in start_attractors:
@@ -147,7 +160,7 @@ def complete(best,population,generations,targetA,max_cycle):
 	#best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
 
 	pickle.dump( best, open( "best_network.pickle", "wb" ) )
-	temp = raw_input("Best network saved in best_network.pickle. Press enter to end")
+	#temp = raw_input("Best network saved in best_network.pickle. Press enter to end")
 def pareto_visualization(population,eliminated):
 	'''
 	visualize the pareto front as evolution goes along
@@ -174,11 +187,12 @@ def pareto_visualization(population,eliminated):
 	plt.draw()
 	time.sleep(0.2)
 
-def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
+def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
 	Age-Fitenss Pareto Optimization algorithm, and deterministic start attractors
+	Returns the Q value of the first network found with fitness 1
 	'''
 	plt.ion()
 	plt.show()
@@ -192,8 +206,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 	#Find fitness for each individual:
 	for individual in population:
 		individual.fitness = evaluate_single(individual,max_cycle,targetA)
-	print "initial fitness of network: "+str(individual.fitness)
-
+	#print individual.measure_modularity()
 	#evolutionary loop is initiated:
 	best = population[0]
 
@@ -208,7 +221,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 			child.fitness = evaluate_single(child,max_cycle,targetA)
 			if child.fitness > best.fitness:
 				best = child
-				print "new best with fitness: ",best.fitness
+				#print "new best with fitness: ",best.fitness
 			next_gen.append(child)
 		population.extend(next_gen)
 		
@@ -217,8 +230,8 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 		new_individual.fitness = evaluate_single(new_individual,max_cycle,targetA)
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
-				best = new_individual
-				print "new best with fitness: ",best.fitness
+			best = new_individual
+			#print "new best with fitness: ",best.fitness
 
 		#check for termination:
 		if(best.fitness==1):
@@ -237,29 +250,35 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 			if(entirely_non_dominated(population)):
 				pop_size=len(population)
 				print "entirely_non_dominated"
- 		pareto_visualization(population,eliminated)
-		update_progress(gen*1.0/(generations-1))
-		print " Population size: ",len(population)
-		#pareto_visualization(population,eliminated)
+ 		#pareto_visualization(population,eliminated)
+		#update_progress((gen*1.0*run_number)/((generations-1)*num_runs))
+		update_progress((run_number*1.0)/(num_runs))
+		#print " Population size: ",len(population)
 
-		
-
-
+	return best.measure_modularity()
 
 
-
-def test_pareto():
+def test_pareto(run_num,num_runs):
 	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
 	pop_size =50 #target number of nondominated individuals
 	generations = 1000
 	mu = 0.25
 	p=0.15
-	det_pareto(target,target, max_cycle, pop_size, generations,mu,p)
+	return det_pareto(target,target, max_cycle, pop_size, generations,mu,p,run_num,num_runs)
 
 
 def main():
 	#rand.seed("this is a seed") #for safety-harness
-	test_pareto()
+	q_values=[]
+	trial_counter=0
+	with open('seeds.pickle', 'rb') as handle:
+		seeds = pickle.load(handle)
 
+	for seed in seeds:
+		trial_counter+=1
+		rand.seed(seed)
+		q_values.append(test_pareto(trial_counter,len(seeds)))
+
+	pickle.dump( q_values, open( "q_values.pickle", "wb" ) )
 main()
