@@ -36,7 +36,7 @@ def generate_initial_attractors(target,set_size,p):
 
 	return returnables
 
-def evaluate_single(individual, max_cycle, target_attractor):
+def evaluate_network(individual, max_cycle, num_attractor_sets):
 	'''
 	Run the network until it reaches a stable attractor, or exceeds the allowed number
 	of generations, return the fitness of this individual
@@ -44,7 +44,10 @@ def evaluate_single(individual, max_cycle, target_attractor):
 	fitness = 0.0
 	#generate a DETERMINISTIC set of perturbations of the target attractor:
 	#start_attractors = generate_initial_attractors(target_attractor,200,p)
-	start_attractors = [
+	fitness_values = list()
+	target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+					   np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])]
+	attractor_sets=[[
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
 						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
 						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
@@ -56,8 +59,8 @@ def evaluate_single(individual, max_cycle, target_attractor):
 						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
 						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
 						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
-						]
-	start_attractorsB = [
+						],
+					[
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,-1]),
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
 						np.array([-1,-1,-1,1,-1,1,-1,1,-1,1]),
@@ -70,38 +73,35 @@ def evaluate_single(individual, max_cycle, target_attractor):
 						np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
 						np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
-	fitness_values = list()
+					]
 
-	for initial_state in start_attractors:
-		individual.nodes=np.zeros(individual.nodes.shape)
-		individual.nodes[0]=initial_state
-		counter = 1
-		while(counter < max_cycle and individual.update_state(counter)):
-			counter += 1
+	for set_index in range(num_attractor_sets):
+	
+		for initial_state in attractor_sets[set_index]:
+			individual.nodes=np.zeros(individual.nodes.shape)
+			individual.nodes[0]=initial_state
+			counter = 1
+			while(counter < max_cycle and individual.update_state(counter)):
+				counter += 1
 
-		if(counter < max_cycle):
-			#stable, not chaotic or cyclic
-			ham = hamming(individual.nodes[counter-1],target_attractor)
-			#print individual.nodes[counter-1]
-			this_fitness = (1-(ham/float(len(target_attractor)))) #raise to the 5th
-			fitness_values.append(this_fitness)
-		else:
-			fitness_values.append(0) #zero fitness for chaotic/cyclic state
+			if(counter < max_cycle):
+				#stable, not chaotic or cyclic
+				ham = hamming(individual.nodes[counter-1],target_attractors[set_index])
+				#print individual.nodes[counter-1]
+				this_fitness = (1-(ham/float(len(target_attractors[set_index])))) #raise to the 5th
+				fitness_values.append(this_fitness)
+			else:
+				fitness_values.append(0) #zero fitness for chaotic/cyclic state
 
 	#print fitness_values
-	my_sum = sum(fitness_values)
+	tot_fitness = sum(fitness_values)
+	# tot_starting_attractors = 0
+	# for attractor_set in range(num_attractor_sets):
+	# 	for attractor in attractor_sets[attractor_set]:
+	# 		tot_starting_attractors+=1
+	tot_starting_attractors = 11*num_attractor_sets
 
-	return my_sum/len(fitness_values)
-
-def evaluate_double(individual, max_cycle, target_attractGirorA, target_attractorB):
-	'''
-	Run evaluate_single on both target attractors
-	'''
-	fitness=0
-	fitness+=evaluate_single(individual, max_cycle, target_attractorA)
-	fitness+=evaluate_single(individual, max_cycle, target_attractorB)
-	return fitness/2.0
-
+	return tot_fitness/tot_starting_attractors
 
 def tournament(population,contenders,eliminated):
 	'''
@@ -187,7 +187,7 @@ def pareto_visualization(population,eliminated):
 	plt.draw()
 	time.sleep(0.2)
 
-def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs):
+def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
@@ -205,20 +205,22 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number
 
 	#Find fitness for each individual:
 	for individual in population:
-		individual.fitness = evaluate_single(individual,max_cycle,targetA)
+		individual.fitness = evaluate_network(individual,max_cycle,num_targets)
 	#print individual.measure_modularity()
 	#evolutionary loop is initiated:
 	best = population[0]
 
-	for gen in range(generations):
-		
+	#for gen in range(generations):
+	gens=0
+	while(best.fitness<1):
+		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
 		for individual in population:
 			individual.genetic_age+=1
 			child = individual.copy()
 			child.perturb(mu)
-			child.fitness = evaluate_single(child,max_cycle,targetA)
+			child.fitness = evaluate_network(child,max_cycle,num_targets)
 			if child.fitness > best.fitness:
 				best = child
 				#print "new best with fitness: ",best.fitness
@@ -227,7 +229,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number
 		
 		#one extra random network is added at zero age:
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
-		new_individual.fitness = evaluate_single(new_individual,max_cycle,targetA)
+		new_individual.fitness = evaluate_network(new_individual,max_cycle,num_targets)
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
 			best = new_individual
@@ -236,7 +238,7 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number
 		#check for termination:
 		if(best.fitness==1):
 			print "optimal fitness found"
-			complete(best,population,gen,targetA,max_cycle)
+			complete(best,population,gens,targetA,max_cycle)
 			break
 
 		#now our population is of size 2k+1, time for tournaments:
@@ -257,20 +259,21 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_number
 
 	return best.measure_modularity()
 
-
-def test_pareto(run_num,num_runs):
-	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+def test_pareto(run_num,num_runs,num_targets):
+	targetA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	targetB = np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])
 	max_cycle = 30
 	pop_size =50 #target number of nondominated individuals
 	generations = 1000
 	mu = 0.25
 	p=0.15
-	return det_pareto(target,target, max_cycle, pop_size, generations,mu,p,run_num,num_runs)
+	return det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_num,num_runs,num_targets)
 
 
 def main():
 	#rand.seed("this is a seed") #for safety-harness
-	q_values=[]
+	q_values_single = []
+	q_values_two = []
 	trial_counter=0
 	with open('seeds.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
@@ -278,7 +281,13 @@ def main():
 	for seed in seeds:
 		trial_counter+=1
 		rand.seed(seed)
-		q_values.append(test_pareto(trial_counter,len(seeds)))
+		q_values_single.append(test_pareto(trial_counter,len(seeds),1))
 
-	pickle.dump( q_values, open( "q_values.pickle", "wb" ) )
+	# for seed in seeds:
+	# 	trial_counter+=1
+	# 	rand.seed(seed)
+	# 	q_values_two.append(test_pareto(trial_counter,len(seeds),2))
+		
+	pickle.dump( q_values_single, open( "q_values_single.pickle", "wb" ) )
+	# pickle.dump( q_values_two, open( "q_values_two.pickle", "wb" ) )
 main()

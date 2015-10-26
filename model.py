@@ -43,13 +43,15 @@ class GRN(object):
 		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
 		by first converting it to a networkx graph
 		'''
+		print self.edges
+		self.edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
 		rows, cols = np.where(self.edges != 0)
-		#print rows.tolist()
 		edges = zip(rows.tolist(), cols.tolist())
+
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
 		partition = community.best_partition(gr)
-		#print community.modularity(partition)
+		print community.modularity(partition,gr)
 		return community.modularity(partition,gr)
 	
 		
