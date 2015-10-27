@@ -61,17 +61,17 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
 						],
 					[
-						np.array([-1,1,-1,1,-1,1,-1,1,-1,-1]),
-						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([-1,-1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([-1,-1,1,1,-1,1,-1,1,-1,1]),
-						np.array([-1,-1,1,-1,-1,1,-1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,1,-1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
+						np.array([-1,1,-1,1,1,1,-1,1,1,-1]),
+						np.array([-1,1,-1,1,1,1,-1,1,1,-1]),
+						np.array([-1,-1,-1,1,1,1,-1,1,1,-1]),
+						np.array([-1,-1,1,1,1,1,-1,1,1,-1]),
+						np.array([-1,-1,1,-1,1,1,-1,1,1,-1]),
+						np.array([-1,-1,1,-1,-1,1,-1,1,1,-1]),
+						np.array([-1,-1,1,-1,-1,-1,-1,1,1,-1]),
+						np.array([-1,-1,1,-1,-1,-1,1,1,1,-1]),
+						np.array([-1,-1,1,-1,-1,-1,1,-1,1,-1]),
+						np.array([-1,-1,1,-1,-1,-1,1,-1,-1,-1]),
+						np.array([-1,-1,1,-1,-1,-1,1,-1,-1,-1])
 						]
 					]
 
@@ -136,9 +136,9 @@ def entirely_non_dominated(population):
 
 def complete(best,population,generations,targetA,max_cycle):
 
-	print "\nPart one complete!"
-	if(best.fitness>-1):
-		print "The network that produced the most accurate attractors had fitness: " , best.fitness
+	#print "\nPart one complete!"
+	#if(best.fitness>-1):
+	#	print "The network that produced the most accurate attractors had fitness: " , best.fitness
 	print "networks evaluated: " , len(population)*generations+generations 
 	# print "Now we apply evolutionary pressure for pattern two"
 
@@ -159,7 +159,7 @@ def complete(best,population,generations,targetA,max_cycle):
 	#best.rectangle_visualization(start_attractors,targetA, "Target A")
 	#best.visualize_network(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),targetA,max_cycle)
 
-	pickle.dump( best, open( "best_network.pickle", "wb" ) )
+	#pickle.dump( best, open( "best_network.pickle", "wb" ) )
 	#temp = raw_input("Best network saved in best_network.pickle. Press enter to end")
 def pareto_visualization(population,eliminated):
 	'''
@@ -187,7 +187,7 @@ def pareto_visualization(population,eliminated):
 	plt.draw()
 	time.sleep(0.2)
 
-def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets):
+def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,seed_network):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
@@ -198,21 +198,30 @@ def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_numbe
 	plt.show()
 	#initial network: 200 networks with identical randomized edges:
 	network_size = len(targetA)
-	initial_edges = model.GRN.initialize_edges(network_size,network_size)
+	#initial_edges = model.GRN.initialize_edges(network_size,network_size)
 	population=list()
-	for i in range(pop_size):
-		population.append(model.GRN(targetA,max_cycle)) #not identical
-
+	population.append(seed_network)
+	for i in range(int(pop_size/2.0)):
+		#print seed_network.nodes
+		new_network = seed_network.copy()
+		new_network.perturb(mu)
+		population.append(new_network) #almost identical
+	for i in range(int(pop_size/2.0)):
+		new_network = model.GRN(targetA,max_cycle)
+		population.append(new_network) #initially randomized
+	print "initialized population"
 	#Find fitness for each individual:
 	for individual in population:
 		individual.fitness = evaluate_network(individual,max_cycle,num_targets)
+	print 'evaluated population'
 	#print individual.measure_modularity()
 	#evolutionary loop is initiated:
 	best = population[0]
-
+	print best.fitness
 	#for gen in range(generations):
 	gens=0
 	while(best.fitness<1):
+
 		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
@@ -223,6 +232,7 @@ def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_numbe
 			child.fitness = evaluate_network(child,max_cycle,num_targets)
 			if child.fitness > best.fitness:
 				best = child
+				print best.fitness
 				#print "new best with fitness: ",best.fitness
 			next_gen.append(child)
 		population.extend(next_gen)
@@ -233,11 +243,12 @@ def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_numbe
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
 			best = new_individual
+			print best.fitness
 			#print "new best with fitness: ",best.fitness
 
 		#check for termination:
 		if(best.fitness==1):
-			print "optimal fitness found"
+			#print "optimal fitness found"
 			complete(best,population,gens,targetA,max_cycle)
 			break
 
@@ -254,20 +265,20 @@ def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_numbe
 				print "entirely_non_dominated"
  		#pareto_visualization(population,eliminated)
 		#update_progress((gen*1.0*run_number)/((generations-1)*num_runs))
-		update_progress((run_number*1.0)/(num_runs))
+		#update_progress((run_number*1.0)/(num_runs))
 		#print " Population size: ",len(population)
 
-	return best.measure_modularity()
+	return best
 
-def test_pareto(run_num,num_runs,num_targets):
+def test_pareto(run_num,num_runs,num_targets,seed_network):
 	targetA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	targetB = np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])
-	max_cycle = 30
-	pop_size =50 #target number of nondominated individuals
+	max_cycle = 20
+	pop_size =30 #target number of nondominated individuals
 	generations = 1000
 	mu = 0.25
 	p=0.15
-	return det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_num,num_runs,num_targets)
+	return det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p,run_num,num_runs,num_targets,seed_network)
 
 
 def main():
@@ -275,19 +286,26 @@ def main():
 	q_values_single = []
 	q_values_two = []
 	trial_counter=0
-	with open('seeds.pickle', 'rb') as handle:
+	max_cycle = 20 #just let me test this
+	
+
+	with open('seeds2.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
 
 	for seed in seeds:
+		#trial for target A only
 		trial_counter+=1
 		rand.seed(seed)
-		q_values_single.append(test_pareto(trial_counter,len(seeds),1))
+		best_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle) #initially randomized
+		best_network = test_pareto(trial_counter,len(seeds),1,best_network)
+		q_values_single.append(best_network.measure_modularity())
 
-	# for seed in seeds:
-	# 	trial_counter+=1
-	# 	rand.seed(seed)
-	# 	q_values_two.append(test_pareto(trial_counter,len(seeds),2))
+		#and trial for target A and B
+		rand.seed(seed)
+		best_network = test_pareto(trial_counter,len(seeds),2,best_network)
+		q_values_two.append(best_network.measure_modularity())
 		
-	pickle.dump( q_values_single, open( "q_values_single.pickle", "wb" ) )
-	# pickle.dump( q_values_two, open( "q_values_two.pickle", "wb" ) )
+		pickle.dump( q_values_single, open( "q_values_single2.pickle", "wb" ) )
+		pickle.dump( q_values_two, open( "q_values_two2.pickle", "wb" ) )
+		print "finished trial ",trial_counter
 main()

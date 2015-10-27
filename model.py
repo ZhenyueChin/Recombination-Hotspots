@@ -36,6 +36,7 @@ class GRN(object):
 		'''
 		deep copy
 		'''
+		#print self.nodes
 		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age)
 
 	def measure_modularity(self):
@@ -43,7 +44,7 @@ class GRN(object):
 		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
 		by first converting it to a networkx graph
 		'''
-		print self.edges
+
 		self.edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
 		rows, cols = np.where(self.edges != 0)
 		edges = zip(rows.tolist(), cols.tolist())
@@ -60,6 +61,7 @@ class GRN(object):
 		'''
 		Initializes a 2D zero np matrix
 		'''
+		first_row = np.squeeze(np.asarray(first_row))
 		mat = np.matrix(np.zeros(rows*len(first_row)).reshape(rows,len(first_row)))
 		mat[0]=first_row
 		return mat
