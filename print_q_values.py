@@ -2,8 +2,8 @@
 import pickle
 from scipy import stats
 
-file1 = 'q_values_single.pickle'
-file2 = 'q_values_two.pickle'
+file1 = 'q_values_single2.pickle'
+file2 = 'q_values_two2.pickle'
 
 with open(file1, 'rb') as handle:
 	vals1 = pickle.load(handle)

@@ -36,6 +36,7 @@ def generate_initial_attractors(target,set_size,p):
 
 	return returnables
 
+@profile
 def evaluate_network(individual, max_cycle, num_attractor_sets):
 	'''
 	Run the network until it reaches a stable attractor, or exceeds the allowed number
@@ -54,24 +55,24 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
 						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
 						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
+						# np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
+						# np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
+						# np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
+						# np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
+						# np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
 						],
 					[
-						np.array([-1,1,-1,1,1,1,-1,1,1,-1]),
-						np.array([-1,1,-1,1,1,1,-1,1,1,-1]),
-						np.array([-1,-1,-1,1,1,1,-1,1,1,-1]),
-						np.array([-1,-1,1,1,1,1,-1,1,1,-1]),
-						np.array([-1,-1,1,-1,1,1,-1,1,1,-1]),
-						np.array([-1,-1,1,-1,-1,1,-1,1,1,-1]),
-						np.array([-1,-1,1,-1,-1,-1,-1,1,1,-1]),
-						np.array([-1,-1,1,-1,-1,-1,1,1,1,-1]),
-						np.array([-1,-1,1,-1,-1,-1,1,-1,1,-1]),
-						np.array([-1,-1,1,-1,-1,-1,1,-1,-1,-1]),
-						np.array([-1,-1,1,-1,-1,-1,1,-1,-1,-1])
+						np.array([-1,1,-1,1,-1,1,-1,-1,-1,-1]),
+						np.array([1,1,-1,1,-1,1,-1,1,1,-1]),
+						np.array([1,-1,-1,1,-1,1,-1,1,1,-1]),
+						np.array([1,-1,1,1,-1,1,-1,1,1,-1]),
+						np.array([1,-1,1,-1,-1,1,-1,1,1,-1]),
+						np.array([1,-1,1,-1,1,1,-1,1,1,-1]),
+						# np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
+						# np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
+						# np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
+						# np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
+						# np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
 					]
 
@@ -99,7 +100,7 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 	# for attractor_set in range(num_attractor_sets):
 	# 	for attractor in attractor_sets[attractor_set]:
 	# 		tot_starting_attractors+=1
-	tot_starting_attractors = 11*num_attractor_sets
+	tot_starting_attractors = 6*num_attractor_sets
 
 	return tot_fitness/tot_starting_attractors
 
@@ -187,6 +188,7 @@ def pareto_visualization(population,eliminated):
 	plt.draw()
 	time.sleep(0.2)
 
+@profile
 def det_pareto(targetA, targetB, max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,seed_network):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
