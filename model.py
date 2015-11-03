@@ -6,6 +6,7 @@ import time
 import matplotlib.pyplot as plt
 import networkx as nx
 import community
+from community import *
 
 class GRN(object):
 	'''
@@ -52,7 +53,7 @@ class GRN(object):
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
 		partition = community.best_partition(gr)
-		print community.modularity(partition,gr)
+		
 		return community.modularity(partition,gr)
 	
 		
@@ -145,7 +146,7 @@ class GRN(object):
 					#print "added negative edge from "+str(toAdd)+" to "+str(i)
 				
 				#raw_input("enter to continue")
-
+	#@profile
 	def update_state(self,t):
 		'''
 		Runs one iteration of network interactions, a single timestep

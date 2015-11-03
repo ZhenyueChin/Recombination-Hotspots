@@ -264,8 +264,8 @@ def det_pareto(targetA,targetB, max_cycle, pop_size, generations,mu,p):
 def test_pareto():
 	target = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 	max_cycle = 30
-	pop_size =50 #target number of nondominated individuals
-	generations = 1000
+	pop_size =0 #target number of nondominated individuals
+	generations = 10
 	mu = 0.05
 	p=0.15
 	det_pareto(target,target, max_cycle, pop_size, generations,mu,p)
