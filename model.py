@@ -56,7 +56,8 @@ class GRN(object):
 		
 		return community.modularity(partition,gr)
 	
-		
+	def get_connectedness(self):
+		return np.count_nonzero(self.edges)
 	@staticmethod
 	def matrix_create(rows, first_row):
 		'''

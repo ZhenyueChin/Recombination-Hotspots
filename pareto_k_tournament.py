@@ -193,8 +193,13 @@ def average_modularity(population):
 	for individual in population:
 		total+=individual.measure_modularity()
 	return total/len(population)
+def average_connectivity(population):
+	total=0
+	for individual in population:
+		total+=individual.get_connectedness()
+	return float(total)/len(population)
 #@profile
-def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population):
+def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
@@ -214,11 +219,11 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 	#evolutionary loop is initiated:
 	best = population[0]
-	print best.fitness
+	#print best.fitness
 	#for gen in range(generations):
 	gens=0
-	while(best.fitness<1):
-
+	best_networks= list()
+	while(len(best_networks)<number_perfect_networks):
 		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
@@ -229,7 +234,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			child.fitness = evaluate_network(child,max_cycle,num_targets)
 			if child.fitness > best.fitness:
 				best = child
-				print best.fitness
+				#print best.fitness
 
 			next_gen.append(child)
 		population.extend(next_gen)
@@ -240,14 +245,20 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
 			best = new_individual
-			print "random individual had best: ",best.fitness
+			#print "random individual had best: ",best.fitness
 			#print "new best with fitness: ",best.fitness
 
 		#check for termination:
 		if(best.fitness==1):
 			#print "optimal fitness found"
-			complete(best,population,gens,targetA,max_cycle)
-			break
+			#print "network with fitness 1 found"
+			best_networks.append(best)
+			#remove other networks of same age
+			population.remove(best)
+			best = population[0]
+			for ind in population:
+				if ind.genetic_age==best.genetic_age:
+					population.remove(ind)
 
 		#now our population is of size 2k+1, time for tournaments:
 		eliminated = []
@@ -265,10 +276,15 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		#update_progress((run_number*1.0)/(num_runs))
 		#print " Population size: ",len(population)
 
-	return population,best
+	return population,best_networks
 
 
 def main():
+	seedsfile=sys.argv[1]
+	outfile1=sys.argv[2]
+	outfile2=sys.argv[3]
+	number_perfect_networks=int(sys.argv[4])
+
 	max_cycle = 20
 	pop_size =30 #target number of nondominated individuals
 	generations = 1000
@@ -282,7 +298,7 @@ def main():
 	max_cycle = 20 #just let me test this
 	
 
-	with open('seeds.pickle', 'rb') as handle:
+	with open(seedsfile+'.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
 
 	for seed in seeds:
@@ -296,17 +312,17 @@ def main():
 			population.append(new_network) #initially randomized
 
 		#trial for target A only
-		population,best_network = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population)
-		q_values_single.append(average_modularity(population))
-		print "for target A only, modularity: ",average_modularity(population)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks)
+		q_values_single.append(average_modularity(best_networks))
+		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
 		#and trial for target A and B
 		rand.seed(seed)
-		population,best_network = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population)
-		q_values_two.append(average_modularity(population))
-		print "for target A and B, modularity: ",average_modularity(population)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks)
+		q_values_two.append(average_modularity(best_networks))
+		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
-		pickle.dump( q_values_single, open( "q_values_single.pickle", "wb" ) )
-		pickle.dump( q_values_two, open( "q_values_two.pickle", "wb" ) )
+		pickle.dump( q_values_single, open( outfile1+".pickle", "wb" ) )
+		pickle.dump( q_values_two, open( outfile2+".pickle", "wb" ) )
 		print "finished trial ",trial_counter
 main()
