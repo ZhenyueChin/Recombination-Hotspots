@@ -4,6 +4,6 @@ import pickle
 seeds=[]
 
 for trial in range(4):
-	for i in range(10):
+	for i in range(60):
 		seeds.append(random.random());
 	pickle.dump( seeds, open( "seeds"+str(trial)+".pickle", "wb" ) )

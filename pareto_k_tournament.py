@@ -217,6 +217,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	for individual in population:
 		individual.fitness = evaluate_network(individual,max_cycle,num_targets)
 
+	#population[0].visualize_network(targetA,targetA,20)
 	#evolutionary loop is initiated:
 	best = population[0]
 	#print best.fitness
@@ -288,7 +289,7 @@ def main():
 	max_cycle = 20
 	pop_size =30 #target number of nondominated individuals
 	generations = 1000
-	mu = 0.25
+	mu = 0.05
 	p=0.15
 
 	#rand.seed("this is a seed") #for safety-harness

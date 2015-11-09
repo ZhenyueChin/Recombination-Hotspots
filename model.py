@@ -222,6 +222,7 @@ class GRN(object):
 		angle = 0.0
 		angleUpdate = 2 * pi /numNeurons
 		ax = plt.axes()
+		print "visualizing"
 		for i in range(0,numNeurons):
 			x = sin(angle)
 			y = cos(angle)
@@ -278,6 +279,7 @@ class GRN(object):
 			plt.axis((-1.5,1.5,-1.5,1.5))
 			plt.draw()
 			time.sleep(0.5)
+			"still visualizing"
 			active = (counter < max_cycle and self.update_state(counter))
 		# print self.nodes
 		
