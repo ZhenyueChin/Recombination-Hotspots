@@ -251,12 +251,13 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 		#check for termination:
 		if(best.fitness==1):
+			print "new best"
+			best.visualize_network
 			#print "optimal fitness found"
 			#print "network with fitness 1 found"
 			best_networks.append(best)
 			#remove other networks of same age
 			population.remove(best)
-			print str(best.fitness)+" vs "+str(population[0].fitness)
 			for ind in population:
 				if ind.genetic_age==best.genetic_age:
 					population.remove(ind)
@@ -325,6 +326,10 @@ def main():
 		q_values_two.append(average_modularity(best_networks))
 		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
+		
+		for i in range(len(best_networks)):
+			pickle.dump(best,open('networks/best_network'+str(i)+'.pickle','wb'))
+			
 		pickle.dump( q_values_single, open( outfile1+".pickle", "wb" ) )
 		pickle.dump( q_values_two, open( outfile2+".pickle", "wb" ) )
 		print "finished trial ",trial_counter

@@ -41,7 +41,7 @@ def main(v):
 
 	# individual.visualize_network()
 	max_cycle=30
-	with open('best_network.pickle', 'rb') as handle:
+	with open('networks/best_network.pickle', 'rb') as handle:
   		individual = pickle.load(handle)
 	start_attractors = [
 						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
