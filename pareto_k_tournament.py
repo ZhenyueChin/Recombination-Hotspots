@@ -256,10 +256,11 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			best_networks.append(best)
 			#remove other networks of same age
 			population.remove(best)
-			best = population[0]
+			print str(best.fitness)+" vs "+str(population[0].fitness)
 			for ind in population:
 				if ind.genetic_age==best.genetic_age:
 					population.remove(ind)
+			best = population[0]
 
 		#now our population is of size 2k+1, time for tournaments:
 		eliminated = []
