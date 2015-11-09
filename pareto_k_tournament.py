@@ -319,6 +319,7 @@ def main():
 		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
 		#and trial for target A and B
+		population.extend(best_networks)
 		rand.seed(seed)
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks)
 		q_values_two.append(average_modularity(best_networks))
