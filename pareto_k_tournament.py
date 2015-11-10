@@ -100,7 +100,7 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 	# for attractor_set in range(num_attractor_sets):
 	# 	for attractor in attractor_sets[attractor_set]:
 	# 		tot_starting_attractors+=1
-	tot_starting_attractors = 6*num_attractor_sets
+	tot_starting_attractors = 11*num_attractor_sets
 
 	return tot_fitness/tot_starting_attractors
 
