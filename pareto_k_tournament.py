@@ -55,11 +55,11 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
 						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
 						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
-						# np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
-						# np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
-						# np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
-						# np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
-						# np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
+						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
 						],
 					[
 						np.array([-1,1,-1,1,-1,1,-1,-1,-1,-1]),
@@ -68,11 +68,11 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 						np.array([1,-1,1,1,-1,1,-1,1,1,-1]),
 						np.array([1,-1,1,-1,-1,1,-1,1,1,-1]),
 						np.array([1,-1,1,-1,1,1,-1,1,1,-1]),
-						# np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
+						np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
+						np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
 					]
 
@@ -300,10 +300,10 @@ def main():
 	trial_counter=0
 	max_cycle = 20 #just let me test this
 	
-
+	pickle.dump(max_cycle,open('networks/best_network'+str(1)+'.pickle','wb'))
 	with open(seedsfile+'.pickle', 'rb') as handle:
-		seeds = pickle.load(handle)
-
+		seeds = pickle.load(handle
+)
 	for seed in seeds:
 		trial_counter+=1
 		rand.seed(seed)
