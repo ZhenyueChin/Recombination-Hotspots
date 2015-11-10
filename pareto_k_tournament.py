@@ -37,7 +37,7 @@ def generate_initial_attractors(target,set_size,p):
 	return returnables
 
 #@profile
-def evaluate_network(individual, max_cycle, num_attractor_sets):
+def evaluate_network(individual, max_cycle, num_attractor_sets,attractor_sets):
 	'''
 	Run the network until it reaches a stable attractor, or exceeds the allowed number
 	of generations, return the fitness of this individual
@@ -48,33 +48,6 @@ def evaluate_network(individual, max_cycle, num_attractor_sets):
 	fitness_values = list()
 	target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
 					   np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])]
-	attractor_sets=[[
-						np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,-1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,-1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,-1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,-1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,1]),
-						np.array([1,-1,1,-1,1,-1,1,-1,1,-1])
-						],
-					[
-						np.array([-1,1,-1,1,-1,1,-1,-1,-1,-1]),
-						np.array([1,1,-1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,-1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,-1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,-1,1,1,-1,1,1,-1]),
-						np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
-						np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
-						]
-					]
 
 	for set_index in range(num_attractor_sets):
 	
@@ -199,7 +172,7 @@ def average_connectivity(population):
 		total+=individual.get_connectedness()
 	return float(total)/len(population)
 #@profile
-def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks):
+def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks,attractor_sets):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
@@ -215,7 +188,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 	#Find fitness for each individual:
 	for individual in population:
-		individual.fitness = evaluate_network(individual,max_cycle,num_targets)
+		individual.fitness = evaluate_network(individual,max_cycle,num_targets,attractor_sets)
 
 	#population[0].visualize_network(targetA,targetA,20)
 	#evolutionary loop is initiated:
@@ -227,6 +200,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	while(len(best_networks)<number_perfect_networks):
 		if(gens%1000==0):
 			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations"
+			print "best fitness so far: "+str(best.fitness)
 		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
@@ -234,7 +208,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			individual.genetic_age+=1
 			child = individual.copy()
 			child.perturb(mu)
-			child.fitness = evaluate_network(child,max_cycle,num_targets)
+			child.fitness = evaluate_network(child,max_cycle,num_targets,attractor_sets)
 			if child.fitness > best.fitness:
 				best = child
 				#print best.fitness
@@ -244,7 +218,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		
 		#one extra random network is added at zero age:
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
-		new_individual.fitness = evaluate_network(new_individual,max_cycle,num_targets)
+		new_individual.fitness = evaluate_network(new_individual,max_cycle,num_targets,attractor_sets)
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
 			best = new_individual
@@ -285,6 +259,28 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 
 def main():
+	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
+					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
+	attractor_sets=[list(),list()]
+	attractor_sets[0].append(target_attractors[0])
+	attractor_sets[1].append(target_attractors[1])
+	print attractor_sets
+	for i in range(10):
+		new_attractor = np.random.randint(2,size=10)
+		new_attractor[new_attractor == 0] = -1
+		new_attractor=new_attractor.tolist()
+		attractor_sets[0].append(new_attractor)
+	for i in range(10):
+		new_attractor = np.random.randint(2,size=10)
+		new_attractor[new_attractor == 0] = -1
+		new_attractor=new_attractor.tolist()
+		while ((new_attractor in attractor_sets[0]) or (new_attractor in attractor_sets[1])):
+			new_attractor = np.random.randint(2,size=10)
+			new_attractor[new_attractor == 0] = -1
+			new_attractor=new_attractor.tolist()
+		attractor_sets[1].append(new_attractor)
+	print attractor_sets
+
 	seedsfile=sys.argv[1]
 	outfile1=sys.argv[2]
 	outfile2=sys.argv[3]
@@ -315,14 +311,14 @@ def main():
 			population.append(new_network) #initially randomized
 
 		#trial for target A only
-		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets)
 		q_values_single.append(average_modularity(best_networks))
 		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
 		#and trial for target A and B
 		population.extend(best_networks)
 		rand.seed(seed)
-		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets)
 		q_values_two.append(average_modularity(best_networks))
 		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 
