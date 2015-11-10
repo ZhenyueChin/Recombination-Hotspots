@@ -328,7 +328,7 @@ def main():
 
 		
 		for i in range(len(best_networks)):
-			pickle.dump(best,open('networks/best_network'+str(i)+'.pickle','wb'))
+			pickle.dump(best_networks[i],open('networks/best_network'+str(i)+'.pickle','wb'))
 			
 		pickle.dump( q_values_single, open( outfile1+".pickle", "wb" ) )
 		pickle.dump( q_values_two, open( outfile2+".pickle", "wb" ) )
