@@ -225,6 +225,8 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	gens=0
 	best_networks= list()
 	while(len(best_networks)<number_perfect_networks):
+		if(gens%1000==0):
+			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations"
 		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
@@ -300,10 +302,8 @@ def main():
 	trial_counter=0
 	max_cycle = 20 #just let me test this
 	
-	pickle.dump(max_cycle,open('networks/best_network'+str(1)+'.pickle','wb'))
 	with open(seedsfile+'.pickle', 'rb') as handle:
-		seeds = pickle.load(handle
-)
+		seeds = pickle.load(handle)
 	for seed in seeds:
 		trial_counter+=1
 		rand.seed(seed)
