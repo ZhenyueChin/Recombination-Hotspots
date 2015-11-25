@@ -53,7 +53,7 @@ class GRN(object):
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
 		partition = community.best_partition(gr)
-		
+		partition = {0:0,1:0,2:0,3:0,4:0,5:1,6:1,7:1,8:1,9:1}
 		return community.modularity(partition,gr)
 	
 	def get_connectedness(self):
