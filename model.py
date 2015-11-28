@@ -53,11 +53,19 @@ class GRN(object):
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
 		partition = community.best_partition(gr)
+		#print partition
+		partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}
 		
 		return community.modularity(partition,gr)
 	
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
+
+	@staticmethod
+	def crossover(net1,net2,crossover_index):
+		temp=np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]])
+		net2.edges=np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]])
+		net1.edges=temp
 	@staticmethod
 	def matrix_create(rows, first_row):
 		'''

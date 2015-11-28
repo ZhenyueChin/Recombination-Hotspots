@@ -162,14 +162,25 @@ def pareto_visualization(population,eliminated):
 	time.sleep(0.2)
 
 def average_modularity(population):
+	if(len(population))==0:
+		return 0
 	total=0
 	for individual in population:
 		total+=individual.measure_modularity()
 	return total/len(population)
 def average_connectivity(population):
 	total=0
+	if(len(population))==0:
+		return 0
 	for individual in population:
 		total+=individual.get_connectedness()
+	return float(total)/len(population)
+def average_fitness(population):
+	if(len(population))==0:
+		return 0
+	total=0
+	for individual in population:
+		total+=individual.fitness
 	return float(total)/len(population)
 #@profile
 def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks,attractor_sets):
@@ -194,11 +205,11 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	#evolutionary loop is initiated:
 	best = population[0]
 	#print best.fitness
-	#for gen in range(generations):
 	gens=0
 	best_networks= list()
-	while(len(best_networks)<number_perfect_networks):
-		if(gens%1000==0):
+	#while(len(best_networks)<number_perfect_networks):
+	for gen in range(generations):
+		if(gens%100==0):
 			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations"
 			print "best fitness so far: "+str(best.fitness)
 		gens+=1
@@ -286,24 +297,26 @@ def main():
 	outfile2=sys.argv[3]
 	number_perfect_networks=int(sys.argv[4])
 
-	max_cycle = 20
-	pop_size =30 #target number of nondominated individuals
-	generations = 1000
+	pop_size =100 #target number of nondominated individuals
+	generations = 500
 	mu = 0.05
 	p=0.15
 
 	#rand.seed("this is a seed") #for safety-harness
 	q_values_single = []
 	q_values_two = []
+	fitness_single = []
+	fitness_two = []
 	trial_counter=0
-	max_cycle = 20 #just let me test this
+	max_cycle = 50 #just let me test this
 	
 	with open(seedsfile+'.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
 	for seed in seeds:
 		trial_counter+=1
 		rand.seed(seed)
-
+		new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
+		print new_network.measure_modularity()
 		#initialize population
 		population=list()
 		for i in range(int(pop_size)):
@@ -311,22 +324,30 @@ def main():
 			population.append(new_network) #initially randomized
 
 		#trial for target A only
+		generations=500
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets)
-		q_values_single.append(average_modularity(best_networks))
-		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
+		q_values_single.append(average_modularity(population))
+		fitness_single.append(average_fitness(population))
+		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(population))," connections: "+str(average_connectivity(best_networks))
 
+		for i in range(len(best_networks)):
+			pickle.dump(best_networks[i],open('networks/best_networkA_'+str(number_perfect_networks)+'_'+str(trial_counter)+'_'+str(i)+'.pickle','wb'))
 		#and trial for target A and B
+		generations=1500
 		population.extend(best_networks)
-		rand.seed(seed)
+		#rand.seed(seed)
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets)
-		q_values_two.append(average_modularity(best_networks))
-		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
+		q_values_two.append(average_modularity(population))
+		fitness_two.append(average_fitness(population))
+		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(population))," connections: "+str(average_connectivity(best_networks))
 
 		
 		for i in range(len(best_networks)):
-			pickle.dump(best_networks[i],open('networks/best_network'+str(i)+'.pickle','wb'))
-			
-		pickle.dump( q_values_single, open( outfile1+".pickle", "wb" ) )
-		pickle.dump( q_values_two, open( outfile2+".pickle", "wb" ) )
+			pickle.dump(best_networks[i],open('networks/best_networkAB_'+str(number_perfect_networks)+'_'+str(trial_counter)+'_'+str(i)+'.pickle','wb'))
+		
+		pickle.dump( fitness_single, open( 'output/fitness_single.pickle', "wb" ) )
+		pickle.dump( fitness_two, open( 'output/fitness_two.pickle', "wb" ) )	
+		pickle.dump( q_values_single, open( 'output/'+outfile1+".pickle", "wb" ) )
+		pickle.dump( q_values_two, open( 'output/'+outfile2+".pickle", "wb" ) )
 		print "finished trial ",trial_counter
 main()

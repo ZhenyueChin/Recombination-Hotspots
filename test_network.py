@@ -41,7 +41,7 @@ def main(v):
 
 	# individual.visualize_network()
 	max_cycle=30
-	with open('networks/best_network0.pickle', 'rb') as handle:
+	with open('networks/best_networkA_3_1_2.pickle', 'rb') as handle:
   		individual = pickle.load(handle)
 	start_attractors = 					[
 						np.array([-1,1,-1,1,-1,1,-1,-1,-1,-1]),
@@ -56,7 +56,7 @@ def main(v):
 						# np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
 						# np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
 						]
-	target_state = np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])
+	target_state = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
 
 	individual.rectangle_visualization(start_attractors,target_state, "TargetA")
 
