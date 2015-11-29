@@ -62,7 +62,10 @@ class GRN(object):
 		return np.count_nonzero(self.edges)
 
 	@staticmethod
-	def crossover(net1,net2,crossover_index):
+	def crossover(net1,net2,crossover_index=-1):
+		if(crossover_index<0):
+			crossover_index=int(rand.random()*10)
+			#print 'crossover_index:'+str(crossover_index)
 		temp=np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]])
 		net2.edges=np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]])
 		net1.edges=temp

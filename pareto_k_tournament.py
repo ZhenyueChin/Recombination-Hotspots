@@ -215,16 +215,28 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		gens+=1
 		#each network is evaluated, and mutated
 		next_gen = []
-		for individual in population:
+		#for individual in population:
+		for i in range(len(population)):
+			individual=population[i]
 			individual.genetic_age+=1
-			child = individual.copy()
-			child.perturb(mu)
-			child.fitness = evaluate_network(child,max_cycle,num_targets,attractor_sets)
-			if child.fitness > best.fitness:
-				best = child
-				#print best.fitness
+			if(i<len(population)/2):
+				if(i%2==0):
+					model.GRN.crossover(individual,population[i+1],5)
+					#print 'genage:'+str(individual.genetic_age)
+					#print 'genage:'+str(population[i+1].genetic_age)
+					new_age= max(individual.genetic_age,population[i+1].genetic_age)
+					#print 'new_age:'+str(new_age)
+					individual.genetic_age=new_age
+					population[i+1].genetic_age=new_age
 
-			next_gen.append(child)
+			else:
+				child = individual.copy()
+				child.perturb(mu)
+				child.fitness = evaluate_network(child,max_cycle,num_targets,attractor_sets)
+				if child.fitness > best.fitness:
+					best = child
+					#print best.fitness
+				next_gen.append(child)
 		population.extend(next_gen)
 		
 		#one extra random network is added at zero age:
