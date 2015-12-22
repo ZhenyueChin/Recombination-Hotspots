@@ -3,8 +3,8 @@ import pickle
 from scipy import stats
 import numpy
 
-file1 = 'output/random_crossover/out0_1.pickle'
-file2 = 'output/random_crossover/out0_2.pickle'
+file1 = 'networks/populationsA.pickle'
+file2 = 'seeds1.pickle'
 
 with open(file1, 'rb') as handle:
 	vals1 = pickle.load(handle)

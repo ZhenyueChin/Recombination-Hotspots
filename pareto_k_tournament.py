@@ -216,26 +216,31 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		#each network is evaluated, and mutated
 		next_gen = []
 		#for individual in population:
+		rand.shuffle(population)
 		for i in range(len(population)):
 			individual=population[i]
 			individual.genetic_age+=1
-			if(i<len(population)/2):
+			# #crossover
+			if(i<len(population)/2):# and num_targets>1):
 				if(i%2==0):
-					model.GRN.crossover(individual,population[i+1],5)
+					model.GRN.crossover(individual,population[i+1],5) #make sure this is the correct index
 					#print 'genage:'+str(individual.genetic_age)
 					#print 'genage:'+str(population[i+1].genetic_age)
 					new_age= max(individual.genetic_age,population[i+1].genetic_age)
 					#print 'new_age:'+str(new_age)
 					individual.genetic_age=new_age
 					population[i+1].genetic_age=new_age
-
+					if(evaluate_network(individual,max_cycle,num_targets,attractor_sets)>best.fitness):
+						best=individual
+					if(evaluate_network(population[i+1],max_cycle,num_targets,attractor_sets)>best.fitness):
+						best=population[i+1]
 			else:
 				child = individual.copy()
 				child.perturb(mu)
 				child.fitness = evaluate_network(child,max_cycle,num_targets,attractor_sets)
 				if child.fitness > best.fitness:
 					best = child
-					#print best.fitness
+				#print best.fitness
 				next_gen.append(child)
 		population.extend(next_gen)
 		
@@ -277,32 +282,58 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		#update_progress((gen*1.0*run_number)/((generations-1)*num_runs))
 		#update_progress((run_number*1.0)/(num_runs))
 		#print " Population size: ",len(population)
-
-	return population,best_networks
-
+	if(len(best_networks)>0):
+		return population,best_networks
+	else:
+		return population,[best]
 
 def main():
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
-	attractor_sets=[list(),list()]
-	attractor_sets[0].append(target_attractors[0])
-	attractor_sets[1].append(target_attractors[1])
-	print attractor_sets
-	for i in range(10):
-		new_attractor = np.random.randint(2,size=10)
-		new_attractor[new_attractor == 0] = -1
-		new_attractor=new_attractor.tolist()
-		attractor_sets[0].append(new_attractor)
-	for i in range(10):
-		new_attractor = np.random.randint(2,size=10)
-		new_attractor[new_attractor == 0] = -1
-		new_attractor=new_attractor.tolist()
-		while ((new_attractor in attractor_sets[0]) or (new_attractor in attractor_sets[1])):
-			new_attractor = np.random.randint(2,size=10)
-			new_attractor[new_attractor == 0] = -1
-			new_attractor=new_attractor.tolist()
-		attractor_sets[1].append(new_attractor)
-	print attractor_sets
+
+	attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
+						[1,1,-1,1,-1,1,-1,1,-1,1],
+						[-1,-1,-1,1,-1,1,-1,1,-1,1],
+						[-1,1,1,1,-1,1,-1,1,-1,1],
+						[-1,1,-1,-1,-1,1,-1,1,-1,1],
+						[-1,1,-1,1,1,1,-1,1,-1,1],
+						[-1,1,-1,1,-1,-1,-1,1,-1,1],
+						[-1,1,-1,1,-1,1,1,1,-1,1],
+						[-1,1,-1,1,-1,1,-1,-1,-1,1],
+						[-1,1,-1,1,-1,1,-1,1,1,1],
+						[-1,1,-1,1,-1,1,-1,1,-1,-1]
+						],
+					  [[-1,1,-1,1,-1,-1,1,-1,1,-1],
+					  [1,1,-1,1,-1,-1,1,-1,1,-1],
+					  [-1,-1,-1,1,-1,-1,1,-1,1,-1],
+					  [-1,1,1,1,-1,-1,1,-1,1,-1],
+					  [-1,1,-1,-1,-1,-1,1,-1,1,-1],
+					  [-1,1,-1,1,1,-1,1,-1,1,-1],
+					  [-1,1,-1,1,-1,1,1,-1,1,-1],
+					  [-1,1,-1,1,-1,-1,-1,-1,1,-1],
+					  [-1,1,-1,1,-1,-1,1,1,1,-1],
+					  [-1,1,-1,1,-1,-1,1,-1,-1,-1],
+					  [-1,1,-1,1,-1,-1,1,-1,1,1]
+					  ]]
+	# attractor_sets=[list(),list()]
+	# attractor_sets[0].append(target_attractors[0])
+	# attractor_sets[1].append(target_attractors[1])
+	# print attractor_sets
+	# for i in range(10):
+	# 	new_attractor = np.random.randint(2,size=10)
+	# 	new_attractor[new_attractor == 0] = -1
+	# 	new_attractor=new_attractor.tolist()
+	# 	attractor_sets[0].append(new_attractor)
+	# for i in range(10):
+	# 	new_attractor = np.random.randint(2,size=10)
+	# 	new_attractor[new_attractor == 0] = -1
+	# 	new_attractor=new_attractor.tolist()
+	# 	while ((new_attractor in attractor_sets[0]) or (new_attractor in attractor_sets[1])):
+	# 		new_attractor = np.random.randint(2,size=10)
+	# 		new_attractor[new_attractor == 0] = -1
+	# 		new_attractor=new_attractor.tolist()
+	# 	attractor_sets[1].append(new_attractor)
+	# print attractor_sets
 
 	seedsfile=sys.argv[1]
 	outfile1=sys.argv[2]
@@ -315,11 +346,13 @@ def main():
 	p=0.15
 
 	#rand.seed("this is a seed") #for safety-harness
-	q_values_single = []
-	q_values_two = []
-	fitness_single = []
-	fitness_two = []
+	#q_values_single = []
+	#q_values_two = []
+	#fitness_single = []
+	#fitness_two = []
 	trial_counter=0
+	final_population_single=[]
+	final_population_two=[]
 	max_cycle = 50 #just let me test this
 	
 	with open(seedsfile+'.pickle', 'rb') as handle:
@@ -338,28 +371,31 @@ def main():
 		#trial for target A only
 		generations=500
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets)
-		q_values_single.append(average_modularity(population))
-		fitness_single.append(average_fitness(population))
-		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(population))," connections: "+str(average_connectivity(best_networks))
+		#q_values_single.append(average_modularity(best_networks))
+		#fitness_single.append(average_fitness(best_networks))
 
-		for i in range(len(best_networks)):
-			pickle.dump(best_networks[i],open('networks/best_networkA_'+str(number_perfect_networks)+'_'+str(trial_counter)+'_'+str(i)+'.pickle','wb'))
+		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
+		population.extend(best_networks)
+		final_population_single.append(population)
+
+		#for i in range(len(best_networks)):
+		pickle.dump(final_population_single,open('networks/populationsA.pickle','wb'))
 		#and trial for target A and B
 		generations=1500
 		population.extend(best_networks)
 		#rand.seed(seed)
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets)
-		q_values_two.append(average_modularity(population))
-		fitness_two.append(average_fitness(population))
-		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(population))," connections: "+str(average_connectivity(best_networks))
-
+		#q_values_two.append(average_modularity(best_networks))
+		#fitness_two.append(average_fitness(best_networks))
+		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))		
+		population.extend(best_networks)
+		final_population_two.append(population)
+		#for i in range(len(best_networks)):
+		pickle.dump(final_population_two,open('networks/populationsB.pickle','wb'))
 		
-		for i in range(len(best_networks)):
-			pickle.dump(best_networks[i],open('networks/best_networkAB_'+str(number_perfect_networks)+'_'+str(trial_counter)+'_'+str(i)+'.pickle','wb'))
-		
-		pickle.dump( fitness_single, open( 'output/fitness_single.pickle', "wb" ) )
-		pickle.dump( fitness_two, open( 'output/fitness_two.pickle', "wb" ) )	
-		pickle.dump( q_values_single, open( 'output/'+outfile1+".pickle", "wb" ) )
-		pickle.dump( q_values_two, open( 'output/'+outfile2+".pickle", "wb" ) )
+		# pickle.dump( fitness_single, open( 'output/fitness_single.pickle', "wb" ) )
+		# pickle.dump( fitness_two, open( 'output/fitness_two.pickle', "wb" ) )	
+		# pickle.dump( q_values_single, open( 'output/'+outfile1+".pickle", "wb" ) )
+		# pickle.dump( q_values_two, open( 'output/'+outfile2+".pickle", "wb" ) )
 		print "finished trial ",trial_counter
 main()
