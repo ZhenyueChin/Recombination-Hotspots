@@ -223,17 +223,9 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			# #crossover
 			if(i<len(population)/2):# and num_targets>1):
 				if(i%2==0):
-					model.GRN.crossover(individual,population[i+1],5) #make sure this is the correct index
-					#print 'genage:'+str(individual.genetic_age)
-					#print 'genage:'+str(population[i+1].genetic_age)
-					new_age= max(individual.genetic_age,population[i+1].genetic_age)
-					#print 'new_age:'+str(new_age)
-					individual.genetic_age=new_age
-					population[i+1].genetic_age=new_age
-					if(evaluate_network(individual,max_cycle,num_targets,attractor_sets)>best.fitness):
-						best=individual
-					if(evaluate_network(population[i+1],max_cycle,num_targets,attractor_sets)>best.fitness):
-						best=population[i+1]
+					xover_children = model.GRN.crossover(individual,population[i+1],-1) #make sure this is the correct index
+					#XOVER CHILDREN NOT TESTED FOR BEST NETWORK
+					next_gen.extend(xover_children)
 			else:
 				child = individual.copy()
 				child.perturb(mu)

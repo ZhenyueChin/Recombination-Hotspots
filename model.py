@@ -15,7 +15,7 @@ class GRN(object):
 	between nodes. 
 	'''
 
-	def __init__(self, n, max_cycles, e = [], age = 0):
+	def __init__(self, n, max_cycles, e = [], age = 0, crossover_preference = None):
 		'''
 		todo: In the paper, how the initial population is formed is not entirely clear.
 		are we supposed to have 100 clones of a single random network for the initial population, 
@@ -23,6 +23,10 @@ class GRN(object):
 		'''
 
 		self.nodes = GRN.matrix_create(max_cycles,n)
+		if(crossover_preference is None):
+			crossover_preference = np.random.dirichlet(np.ones(9))
+		self.crossover_preference=crossover_preference
+
 		if(e==[]):
 			self.edges = self.initialize_edges(len(n),len(n))
 		else:
@@ -38,7 +42,7 @@ class GRN(object):
 		deep copy
 		'''
 		#print self.nodes
-		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age)
+		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age,self.crossover_preference)
 
 	def measure_modularity(self):
 		'''
@@ -63,12 +67,33 @@ class GRN(object):
 
 	@staticmethod
 	def crossover(net1,net2,crossover_index=-1):
+		'''
+		Note that as of 1/7, the parent networks are NOT affected by this function. Two children networks are returned.
+		'''
 		if(crossover_index<0):
-			crossover_index=int(rand.random()*10)
-			#print 'crossover_index:'+str(crossover_index)
-		temp=np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]])
-		net2.edges=np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]])
-		net1.edges=temp
+			#crossover index is derived from an average of the two crossing-over network meta-arrays
+			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+			choice=rand.random()
+			tot=0
+			x_point=0
+			while(choice>tot and x_point<len(new_probability_matrix)):
+				tot+=new_probability_matrix[x_point]
+				x_point+=1
+
+			crossover_index=x_point
+			print 'crossover_index:'+str(crossover_index)
+
+		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+
+		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+
+		return child1,child2
 	@staticmethod
 	def matrix_create(rows, first_row):
 		'''
@@ -121,7 +146,8 @@ class GRN(object):
 
 	def mutate(self,i):
 		'''
-		Mutates the specified gene at index i according to the rule specified in page 9 of the original paper
+		Mutates the specified gene at index i according to the rule specified in page 9 of the original paper.
+		Also mutates the prefered crossover point metainformation
 		'''
 		N = self.nodes.shape[1]									#number of nodes in the network
 		r_u = 0  												#number of regulators for this gene
@@ -157,7 +183,18 @@ class GRN(object):
 					self.edges[toAdd,i]=-1
 					#print "added negative edge from "+str(toAdd)+" to "+str(i)
 				
-				#raw_input("enter to continue")
+		self.mutate_meta_xover()
+
+	def mutate_meta_xover(self):
+		'''
+		mutates the metainformation array dictating xover probability in different indexes.
+		'''
+		src_index = rand.randint(0,len(self.crossover_preference)-1)
+		dest_index = rand.randint(0,len(self.crossover_preference)-1)
+		transfer_amt = rand.uniform(0,self.crossover_preference[src_index])
+		dest_index+=transfer_amt
+		src_index-=transfer_amt
+		
 	#@profile
 	def update_state(self,t):
 		'''
