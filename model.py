@@ -68,10 +68,10 @@ class GRN(object):
 	@staticmethod
 	def crossover(net1,net2,crossover_index=-1):
 		'''
-		Note that as of 1/7, the parent networks are NOT affected by this function. Two children networks are returned.
+		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
 		if(crossover_index<0):
-			#crossover index is derived from an average of the two crossing-over network meta-arrays
+			#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
 			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
 			choice=rand.random()
 			tot=0
@@ -81,7 +81,7 @@ class GRN(object):
 				x_point+=1
 
 			crossover_index=x_point
-			print 'crossover_index:'+str(crossover_index)
+			#print 'crossover_index:'+str(crossover_index)
 
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
