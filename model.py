@@ -83,6 +83,7 @@ class GRN(object):
 			crossover_index=x_point
 			#print 'crossover_index:'+str(crossover_index)
 
+
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
