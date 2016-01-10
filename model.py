@@ -48,6 +48,7 @@ class GRN(object):
 		'''
 		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
 		by first converting it to a networkx graph
+		TODO: why on earth am I altering the GRN's actual edges? my god.
 		'''
 
 		self.edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
@@ -56,7 +57,7 @@ class GRN(object):
 
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
-		partition = community.best_partition(gr)
+		#partition = community.best_partition(gr)
 		#print partition
 		partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}
 		
@@ -65,24 +66,52 @@ class GRN(object):
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
 
+	def E5_get_xover_dist(self):
+		'''
+		get the probabilistic xover distribution based purely on modularity ratings of the 9 possible xover indexes
+		'''
+		print self.edges
+		self_edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
+		rows, cols = np.where(self_edges != 0)
+		edges = zip(rows.tolist(), cols.tolist())
+
+		gr = nx.Graph()
+		gr.add_edges_from(edges)
+		modularity_ratings=list()
+		for i in range(1,10): #possible indexes are [1,9]
+			seq1 =range(0,i)
+			seq2 =range(9,i-1,-1)
+
+			partition = dict.fromkeys(seq1,0)
+			partition.update(dict.fromkeys(seq2,1))
+			modularity_ratings.append(community.modularity(partition,gr))
+		print modularity_ratings
+
 	@staticmethod
-	def crossover(net1,net2,crossover_index=-1):
+	def sample_from_prob_distribution(distribution):
+		choice=rand.random()
+		tot=0
+		x_point=0
+		while(choice>tot and x_point<len(distribution)):
+			tot+=distribution[x_point]
+			x_point+=1
+
+		return x_point
+	@staticmethod
+	def E5_modularity_crossover(net1,net2,crossover_index=-1):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
 		if(crossover_index<0):
-			#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
+			#E5: crossover index is derived probabilistically by modularity rating
+			net1.crossover_preference = net1.E5_get_xover_dist()
+			net2.crossover_preference = net2.E5_get_xover_dist()
+			
 			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
-			choice=rand.random()
-			tot=0
-			x_point=0
-			while(choice>tot and x_point<len(new_probability_matrix)):
-				tot+=new_probability_matrix[x_point]
-				x_point+=1
 
-			crossover_index=x_point
-			#print 'crossover_index:'+str(crossover_index)
-
+			crossover_index = sample_from_prop_distribution(new_probability_matrix)
+			#print crossover_index
+			
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
@@ -93,6 +122,29 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 
+		return child1,child2
+	@staticmethod
+	def E4_evolved_crossover(net1,net2,crossover_index=-1):
+		'''
+		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
+		'''
+		if(crossover_index<0):
+			#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
+			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
+			print crossover_index
+		else:
+			new_probability_matrix=net1.crossover_preference
+		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+
+		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+		print child1.edges
 		return child1,child2
 	@staticmethod
 	def matrix_create(rows, first_row):
