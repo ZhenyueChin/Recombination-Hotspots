@@ -42,8 +42,11 @@ def main(v):
 
 	# individual.visualize_network()
 	max_cycle=20
-	with open('networks/E1/populationsA.pickle', 'rb') as handle:
+	with open('networks/E2/populationsA.pickle', 'rb') as handle:
   		populationsA = pickle.load(handle)
+  	with open('networks/E2/populationsB.pickle', 'rb') as handle:
+  		populationsB = pickle.load(handle)
+
 
   	
 	attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
@@ -70,12 +73,27 @@ def main(v):
 					  [-1,1,-1,1,-1,-1,1,-1,-1,-1],
 					  [-1,1,-1,1,-1,-1,1,-1,1,1]
 					  ]]
-	target_state = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
-	for individual in populationsA[0]:
-  		print model.GRN.evaluate_network(individual, max_cycle, 2 ,attractor_sets)
-  	individual=populationsA[0][0]
+	#for targetA
+	# target_stateA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	fitnessesA = [model.GRN.evaluate_network(individual, max_cycle, 1 ,attractor_sets) for individual in populationsA[0]]
+	percentile95A=np.percentile(fitnessesA, 95)
+	top_performersA = [individual for individual in populationsA[0] if individual.fitness>=percentile95A]
+	print top_performersA
+	print "avg fitness for 95th percentile targetA: "+str(np.mean([i.fitness for i in top_performersA]))
+	print "avg mod for 95th percentile targetA: "+str(np.mean([i.measure_modularity() for i in top_performersA]))
 
-	individual.rectangle_visualization(attractor_sets[0],target_state, "TargetA")
+	#for targetB
+	# target_stateB = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	fitnessesB = [model.GRN.evaluate_network(individual, max_cycle, 2 ,attractor_sets) for individual in populationsB[0]]
+	percentile95B=np.percentile(fitnessesB, 95)
+	top_performersB = [individual for individual in populationsB[0] if individual.fitness>=percentile95B]
+	print top_performersB
+	print "avg fitness for 95th percentile targetB: "+str(np.mean([i.fitness for i in top_performersB]))
+	print "avg mod for 95th percentile targetB: "+str(np.mean([i.measure_modularity() for i in top_performersB]))
+
+  	individual=top_performersA[0]
+	target_stateA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	individual.rectangle_visualization(attractor_sets[0],target_stateA, "TargetA")
 
 	for start_state in attractor_sets[0]:
   		individual.visualize_network(start_state,target_state,max_cycle)
