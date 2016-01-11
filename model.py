@@ -70,22 +70,22 @@ class GRN(object):
 		'''
 		get the probabilistic xover distribution based purely on modularity ratings of the 9 possible xover indexes
 		'''
-		print self.edges
+		#print self.edges
 		self_edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
 		rows, cols = np.where(self_edges != 0)
 		edges = zip(rows.tolist(), cols.tolist())
 
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
-		modularity_ratings=list()
+		modularity_ratings=np.zeros(9)
 		for i in range(1,10): #possible indexes are [1,9]
 			seq1 =range(0,i)
 			seq2 =range(9,i-1,-1)
 
 			partition = dict.fromkeys(seq1,0)
 			partition.update(dict.fromkeys(seq2,1))
-			modularity_ratings.append(community.modularity(partition,gr))
-		print modularity_ratings
+			modularity_ratings[i-1]=(community.modularity(partition,gr))
+		return modularity_ratings
 
 	@staticmethod
 	def sample_from_prob_distribution(distribution):
@@ -109,7 +109,7 @@ class GRN(object):
 			
 			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
 
-			crossover_index = sample_from_prop_distribution(new_probability_matrix)
+			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 			#print crossover_index
 			
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
@@ -132,7 +132,7 @@ class GRN(object):
 			#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
 			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
 			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
-			print crossover_index
+			#print crossover_index
 		else:
 			new_probability_matrix=net1.crossover_preference
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
@@ -144,7 +144,7 @@ class GRN(object):
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
-		print child1.edges
+		#print child1.edges
 		return child1,child2
 	@staticmethod
 	def matrix_create(rows, first_row):
