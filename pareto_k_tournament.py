@@ -10,15 +10,6 @@ import pickle
 import time
 
 
-def hamming(attractor, target):
-	'''
-	TODO: make this cooler
-	'''
-	count = 0
-	for i in range(len(attractor)):
-		if(target[i] == attractor[i]):
-			count += 1
-	return len(attractor)-count
 
 
 def generate_initial_attractors(target,set_size,p):
@@ -36,46 +27,6 @@ def generate_initial_attractors(target,set_size,p):
 
 	return returnables
 
-#@profile
-def evaluate_network(individual, max_cycle, num_attractor_sets,attractor_sets):
-	'''
-	Run the network until it reaches a stable attractor, or exceeds the allowed number
-	of generations, return the fitness of this individual
-	'''
-	fitness = 0.0
-	#generate a DETERMINISTIC set of perturbations of the target attractor:
-	#start_attractors = generate_initial_attractors(target_attractor,200,p)
-	fitness_values = list()
-	target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
-					   np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])]
-
-	for set_index in range(num_attractor_sets):
-	
-		for initial_state in attractor_sets[set_index]:
-			individual.nodes=np.zeros(individual.nodes.shape)
-			individual.nodes[0]=initial_state
-			counter = 1
-			while(counter < max_cycle and individual.update_state(counter)):
-				counter += 1
-
-			if(counter < max_cycle):
-				#stable, not chaotic or cyclic
-				ham = hamming(individual.nodes[counter-1],target_attractors[set_index])
-				#print individual.nodes[counter-1]
-				this_fitness = (1-(ham/float(len(target_attractors[set_index])))) #raise to the 5th
-				fitness_values.append(this_fitness)
-			else:
-				fitness_values.append(0) #zero fitness for chaotic/cyclic state
-
-	#print fitness_values
-	tot_fitness = sum(fitness_values)
-	# tot_starting_attractors = 0
-	# for attractor_set in range(num_attractor_sets):
-	# 	for attractor in attractor_sets[attractor_set]:
-	# 		tot_starting_attractors+=1
-	tot_starting_attractors = 11*num_attractor_sets
-
-	return tot_fitness/tot_starting_attractors
 
 def tournament(population,contenders,eliminated):
 	'''
@@ -199,7 +150,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 	#Find fitness for each individual:
 	for individual in population:
-		individual.fitness = evaluate_network(individual,max_cycle,num_targets,attractor_sets)
+		model.GRN.evaluate_network(individual,max_cycle,num_targets,attractor_sets)
 
 	#population[0].visualize_network(targetA,targetA,20)
 	#evolutionary loop is initiated:
@@ -229,7 +180,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			else:
 				child = individual.copy()
 				child.perturb(mu)
-				child.fitness = evaluate_network(child,max_cycle,num_targets,attractor_sets)
+				model.GRN.evaluate_network(child,max_cycle,num_targets,attractor_sets)
 				if child.fitness > best.fitness:
 					best = child
 				#print best.fitness
@@ -238,7 +189,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		
 		#one extra random network is added at zero age:
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
-		new_individual.fitness = evaluate_network(new_individual,max_cycle,num_targets,attractor_sets)
+		model.GRN.evaluate_network(new_individual,max_cycle,num_targets,attractor_sets)
 		population.append(new_individual)
 		if new_individual.fitness > best.fitness:
 			best = new_individual

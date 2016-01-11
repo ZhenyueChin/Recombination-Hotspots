@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import model
 import sys
 import pickle
+import model
 
 
 def main(v):
@@ -40,27 +41,43 @@ def main(v):
 	# 	print "chaotic or cyclic"
 
 	# individual.visualize_network()
-	max_cycle=30
-	with open('networks/best_networkA_3_1_2.pickle', 'rb') as handle:
-  		individual = pickle.load(handle)
-	start_attractors = 					[
-						np.array([-1,1,-1,1,-1,1,-1,-1,-1,-1]),
-						np.array([1,1,-1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,-1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,-1,-1,1,-1,1,1,-1]),
-						np.array([1,-1,1,-1,1,1,-1,1,1,-1]),
-						# np.array([-1,-1,1,-1,1,-1,-1,1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,-1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,1,1]),
-						# np.array([-1,-1,1,-1,1,-1,1,-1,1,-1])
-						]
+	max_cycle=20
+	with open('networks/E1/populationsA.pickle', 'rb') as handle:
+  		populationsA = pickle.load(handle)
+
+  	
+	attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
+						[1,1,-1,1,-1,1,-1,1,-1,1],
+						[-1,-1,-1,1,-1,1,-1,1,-1,1],
+						[-1,1,1,1,-1,1,-1,1,-1,1],
+						[-1,1,-1,-1,-1,1,-1,1,-1,1],
+						[-1,1,-1,1,1,1,-1,1,-1,1],
+						[-1,1,-1,1,-1,-1,-1,1,-1,1],
+						[-1,1,-1,1,-1,1,1,1,-1,1],
+						[-1,1,-1,1,-1,1,-1,-1,-1,1],
+						[-1,1,-1,1,-1,1,-1,1,1,1],
+						[-1,1,-1,1,-1,1,-1,1,-1,-1]
+						],
+					  [[-1,1,-1,1,-1,-1,1,-1,1,-1],
+					  [1,1,-1,1,-1,-1,1,-1,1,-1],
+					  [-1,-1,-1,1,-1,-1,1,-1,1,-1],
+					  [-1,1,1,1,-1,-1,1,-1,1,-1],
+					  [-1,1,-1,-1,-1,-1,1,-1,1,-1],
+					  [-1,1,-1,1,1,-1,1,-1,1,-1],
+					  [-1,1,-1,1,-1,1,1,-1,1,-1],
+					  [-1,1,-1,1,-1,-1,-1,-1,1,-1],
+					  [-1,1,-1,1,-1,-1,1,1,1,-1],
+					  [-1,1,-1,1,-1,-1,1,-1,-1,-1],
+					  [-1,1,-1,1,-1,-1,1,-1,1,1]
+					  ]]
 	target_state = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	for individual in populationsA[0]:
+  		print model.GRN.evaluate_network(individual, max_cycle, 2 ,attractor_sets)
+  	individual=populationsA[0][0]
 
-	individual.rectangle_visualization(start_attractors,target_state, "TargetA")
+	individual.rectangle_visualization(attractor_sets[0],target_state, "TargetA")
 
-	for start_state in start_attractors:
+	for start_state in attractor_sets[0]:
   		individual.visualize_network(start_state,target_state,max_cycle)
   		temp = raw_input("enter to end")
 main(sys.argv)

@@ -62,7 +62,60 @@ class GRN(object):
 		partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}
 		
 		return community.modularity(partition,gr)
-	
+		#@profile
+
+	@staticmethod
+	def hamming_distance(attractor, target):
+		'''
+		TODO: make this cooler
+		'''
+		count = 0
+		for i in range(len(attractor)):
+			if(target[i] == attractor[i]):
+				count += 1
+		return len(attractor)-count
+		
+	def evaluate_network(self, max_cycle, num_targets,attractor_sets):
+		'''
+		Run the network until it reaches a stable attractor, or exceeds the allowed number
+		of generations, return the fitness of this individual
+		'''
+		fitness = 0.0
+		#generate a DETERMINISTIC set of perturbations of the target attractor:
+		#start_attractors = generate_initial_attractors(target_attractor,200,p)
+		fitness_values = list()
+		target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
+						   np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])]
+
+		for set_index in range(num_targets):
+		
+			for initial_state in attractor_sets[set_index]:
+				self.nodes=np.zeros(self.nodes.shape)
+				self.nodes[0]=initial_state
+				counter = 1
+				while(counter < max_cycle and self.update_state(counter)):
+					counter += 1
+
+				if(counter < max_cycle):
+					#stable, not chaotic or cyclic
+					ham = GRN.hamming_distance(self.nodes[counter-1],target_attractors[set_index])
+					#print self.nodes[counter-1]
+					this_fitness = (1-(ham/float(len(target_attractors[set_index])))) #raise to the 5th
+					fitness_values.append(this_fitness)
+				else:
+					fitness_values.append(0) #zero fitness for chaotic/cyclic state
+
+		#print fitness_values
+		tot_fitness = sum(fitness_values)
+		# tot_starting_attractors = 0
+		# for attractor_set in range(num_targets):
+		# 	for attractor in attractor_sets[attractor_set]:
+		# 		tot_starting_attractors+=1
+		tot_starting_attractors = 11*num_targets
+
+		self.fitness= tot_fitness/tot_starting_attractors
+		return self.fitness
+
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
 
@@ -267,6 +320,7 @@ class GRN(object):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
 
 		return (not np.array_equal(self.nodes[t-1,:],self.nodes[t,:]))
+
 
 
 	def rectangle_visualization(self,initial_states,target, title):
