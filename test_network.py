@@ -50,14 +50,15 @@ def get_top_performers(cutoff,population,phase):
 
 	# plt.hist(top_fitnesses,normed=True)      #use this to draw histogram of your data
 
-	plt.show() 
+	# plt.show() 
+
+	return top_performers
+
+def print_summary_stats(top_performers):
 
 	print "number of top performers: "+str(len(top_performers))
 	print "avg fitness for percentile: "+str(np.mean([i.fitness for i in top_performers]))
 	print "avg mod for percentile: "+str(np.mean([i.measure_modularity() for i in top_performers]))
-
-	return top_performers
-
 
 def main(v):
 	# v = v[1:]
@@ -91,9 +92,9 @@ def main(v):
 
 	# individual.visualize_network()
 
-	exp1 = "E4"
-	exp2 = "E5"
-	percentile = 75
+	exp1 = "E3"
+	exp2 = "E4"
+	percentile = 95
 	trial_1_populationsA = []
 	trial_1_populationsB = []
 	trial_2_populationsA = []
@@ -101,27 +102,32 @@ def main(v):
 	
 	with open('networks/'+exp1+'/run2/populationsA.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
-  			trial_1_populationsA+=pop
+  			trial_1_populationsA+=get_top_performers(percentile,pop,1)
   		print len(trial_1_populationsA)
+
+  	plt.hist([i.fitness for i in trial_1_populationsA],normed=True)      #use this to draw histogram of your data
+
+	plt.show() 
+
   	# with open('networks/'+exp1+'/populationsA.pickle', 'rb') as handle:
   	# 	trial_1_populationsA+=(pickle.load(handle))[0]
   	# 	print "\n"
   	# 	print len(trial_1_populationsA)
   	with open('networks/'+exp1+'/run2/populationsB.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
-  			trial_1_populationsB+=pop
+  			trial_1_populationsB+=get_top_performers(percentile,pop,2)
   	# with open('networks/'+exp1+'/populationsB.pickle', 'rb') as handle:
   	# 	trial_1_populationsB+=(pickle.load(handle))[0]
 
   	with open('networks/'+exp2+'/run2/populationsA.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
-  			trial_2_populationsA+=pop
+  			trial_2_populationsA+=get_top_performers(percentile,pop,1)
   	# with open('networks/'+exp2+'/populationsB.pickle', 'rb') as handle:
   	# 	trial_2_populationsA+=(pickle.load(handle))[0]
 
   	with open('networks/'+exp2+'/run2/populationsB.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
-  			trial_2_populationsB+=pop
+  			trial_2_populationsB+=get_top_performers(percentile,pop,2)
   	# with open('networks/'+exp2+'/populationsB.pickle', 'rb') as handle:
   	# 	trial_2_populationsB+=(pickle.load(handle))[0]
 
@@ -129,19 +135,30 @@ def main(v):
   	print len(trial_1_populationsB)
   	print len(trial_2_populationsA)
   	print len(trial_2_populationsB)
-  	
+
+  	print("\n"+exp1+"A:")
+  	print_summary_stats(trial_1_populationsA)
+  	print("\n"+exp1+"B:")
+  	print_summary_stats(trial_1_populationsB)
+  	print("\n"+exp2+"A:")
+  	print_summary_stats(trial_2_populationsA)
+  	print("\n"+exp2+"B:")
+  	print_summary_stats(trial_2_populationsB)
 	
 	#trim population down to unique geneological trees? difficult when crossing over (multiple networks with same age)
-	print "\n"+exp1+" part A"
-	trial_1_top_performersA = get_top_performers(percentile,trial_1_populationsA,1)
-	print "\n"+exp1+" part B"
-	trial_1_top_performersB = get_top_performers(percentile,trial_1_populationsB,2)
+	# print "\n"+exp1+" part A"
+	# trial_1_top_performersA = get_top_performers(percentile,trial_1_populationsA,1)
+	# print "\n"+exp1+" part B"
+	# trial_1_top_performersB = get_top_performers(percentile,trial_1_populationsB,2)
 
-	print "\n"+exp2+" part A"
-	trial_2_top_performersA = get_top_performers(percentile,trial_2_populationsA,1)
-	print "\n"+exp2+" part B"
-	trial_2_top_performersB = get_top_performers(percentile,trial_2_populationsB,2)
-	
+	# print "\n"+exp2+" part A"
+	# trial_2_top_performersA = get_top_performers(percentile,trial_2_populationsA,1)
+	# print "\n"+exp2+" part B"
+	# trial_2_top_performersB = get_top_performers(percentile,trial_2_populationsB,2)
+	trial_1_top_performersA = trial_1_populationsA
+	trial_1_top_performersB = trial_1_populationsB
+	trial_2_top_performersA = trial_2_populationsA
+	trial_2_top_performersB = trial_2_populationsB
 
 	#t-test
 	print "\nt value for comparing modularity, part A"
