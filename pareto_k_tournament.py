@@ -147,7 +147,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	#initial network: 200 networks with identical randomized edges:
 	network_size = len(targetA)
 	#initial_edges = model.GRN.initialize_edges(network_size,network_size)
-
+	E=5
 	#Find fitness for each individual:
 	for individual in population:
 		model.GRN.evaluate_network(individual,max_cycle,num_targets,attractor_sets)
@@ -172,9 +172,9 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			individual=population[i]
 			individual.genetic_age+=1
 			# #crossover
-			if(i<len(population)/2):# and num_targets>1):
+			if(i<len(population)/2 and num_targets>1):
 				if(i%2==0):
-					xover_children = model.GRN.E5_modularity_crossover(individual,population[i+1],-1) #make sure this is the correct index
+					xover_children = model.GRN.crossover(individual,population[i+1],E) #make sure this is the correct index
 					#XOVER CHILDREN NOT TESTED FOR BEST NETWORK
 					next_gen.extend(xover_children)
 			else:
@@ -322,7 +322,7 @@ def main():
 		final_population_single.append(population)
 
 		#for i in range(len(best_networks)):
-		pickle.dump(final_population_single,open('networks/populationsA.pickle','wb'))
+		pickle.dump(final_population_single,open('networks/populationsA'+sys.argv[4]+'.pickle','wb'))
 		#and trial for target A and B
 		generations=1500
 		population.extend(best_networks)
@@ -334,7 +334,7 @@ def main():
 		population.extend(best_networks)
 		final_population_two.append(population)
 		#for i in range(len(best_networks)):
-		pickle.dump(final_population_two,open('networks/populationsB.pickle','wb'))
+		pickle.dump(final_population_two,open('networks/populationsB'+sys.argv[4]+'.pickle','wb'))
 		
 		# pickle.dump( fitness_single, open( 'output/fitness_single.pickle', "wb" ) )
 		# pickle.dump( fitness_two, open( 'output/fitness_two.pickle', "wb" ) )	

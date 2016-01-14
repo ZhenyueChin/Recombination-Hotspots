@@ -119,6 +119,27 @@ class GRN(object):
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
 
+	def crossover(net1,net2,E):
+		'''
+		select appropriate crossover based on E, and record the crossover point
+		'''
+		if(E==2):
+			c1,c2,x_over =  E2_naive_crossover(net1,net2)
+		elif(E==3):
+			c1,c2,x_over =  E3_fixed_crossover(net1,net2)
+		elif(E==4):
+			c1,c2,x_over =  E4_evolved_crossover(net1,net2)
+		elif(E==5):
+			c1,c2,x_over =  E5_modularity_crossover(net1,net2)
+		else:
+			print "invalid E value"
+
+		with open('networks/crossovers.pickle', 'rb') as handle:
+  			xover_list = pickle.load(handle)
+  			xover_list.add(x_over)
+
+  		return c1,c2
+  		
 	def E5_get_xover_dist(self):
 		'''
 		get the probabilistic xover distribution based purely on modularity ratings of the 9 possible xover indexes
@@ -151,19 +172,18 @@ class GRN(object):
 
 		return x_point
 	@staticmethod
-	def E5_modularity_crossover(net1,net2,crossover_index=-1):
+	def E5_modularity_crossover(net1,net2):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		if(crossover_index<0):
-			#E5: crossover index is derived probabilistically by modularity rating
-			net1.crossover_preference = net1.E5_get_xover_dist()
-			net2.crossover_preference = net2.E5_get_xover_dist()
-			
-			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2 #not actually used in E5
+		
+		#E5: crossover index is derived probabilistically by modularity rating
+		net1.crossover_preference = net1.E5_get_xover_dist()
+		net2.crossover_preference = net2.E5_get_xover_dist()
+		
+		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2 #not actually used in E5
 
-			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
-			#print crossover_index
+		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 			
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
@@ -175,19 +195,17 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 
-		return child1,child2
+		return child1,child2,crossover_index
 	@staticmethod
-	def E4_evolved_crossover(net1,net2,crossover_index=-1):
+	def E4_evolved_crossover(net1,net2):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		if(crossover_index<0):
-			#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
-			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
-			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
-			#print crossover_index
-		else:
-			new_probability_matrix=net1.crossover_preference
+		
+		#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
+		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
+		
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
@@ -198,10 +216,10 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 		#print child1.edges
-		return child1,child2
+		return child1,child2,crossover_index
 
 	@staticmethod
-	def E3_fixed_crossover(net1,net2,crossover_index=5):
+	def E3_fixed_crossover(net1,net2):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
@@ -217,10 +235,10 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 		#print child1.edges
-		return child1,child2
+		return child1,child2,crossover_index
 
 	@staticmethod
-	def E2_naive_crossover(net1,net2,crossover_index=-1):
+	def E2_naive_crossover(net1,net2):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
@@ -236,7 +254,7 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 		#print child1.edges
-		return child1,child2
+		return child1,child2,crossover_index
 
 
 	@staticmethod
