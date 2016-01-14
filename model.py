@@ -74,7 +74,7 @@ class GRN(object):
 			if(target[i] == attractor[i]):
 				count += 1
 		return len(attractor)-count
-		
+
 	def evaluate_network(self, max_cycle, num_targets,attractor_sets):
 		'''
 		Run the network until it reaches a stable attractor, or exceeds the allowed number
@@ -160,7 +160,7 @@ class GRN(object):
 			net1.crossover_preference = net1.E5_get_xover_dist()
 			net2.crossover_preference = net2.E5_get_xover_dist()
 			
-			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+			new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2 #not actually used in E5
 
 			crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 			#print crossover_index
@@ -199,6 +199,46 @@ class GRN(object):
 				   new_probability_matrix)
 		#print child1.edges
 		return child1,child2
+
+	@staticmethod
+	def E3_fixed_crossover(net1,net2,crossover_index=5):
+		'''
+		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
+		'''
+		crossover_index=5
+		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+
+		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+		#print child1.edges
+		return child1,child2
+
+	@staticmethod
+	def E2_naive_crossover(net1,net2,crossover_index=-1):
+		'''
+		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
+		'''
+		crossover_index = rand.randint(1,9)
+		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+
+		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
+				   max(net1.genetic_age,net2.genetic_age),
+				   new_probability_matrix)
+		#print child1.edges
+		return child1,child2
+
+
 	@staticmethod
 	def matrix_create(rows, first_row):
 		'''
