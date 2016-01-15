@@ -175,7 +175,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			# #crossover
 			if(i<len(population)/2 and num_targets>1):
 				if(i%2==0):
-					xover_children = model.GRN.crossover(individual,population[i+1],E,core,run_number) #make sure this is the correct index
+					xover_children = model.GRN.crossover(individual,population[i+1],E,core,run_number,gen) #make sure this is the correct index
 					next_gen.extend(xover_children)
 			else:
 				child = individual.copy()

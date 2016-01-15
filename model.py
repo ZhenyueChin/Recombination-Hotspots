@@ -120,7 +120,7 @@ class GRN(object):
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
 
-	def crossover(net1,net2,E,core,trial_counter):
+	def crossover(net1,net2,E,core,trial_counter,gen):
 		'''
 		select appropriate crossover based on E, and record the crossover point
 		'''
@@ -139,7 +139,7 @@ class GRN(object):
 		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','rb')
 		xover_list = pickle.load(x_over_file)
 		x_over_file.close()
-		xover_list.append(x_over)
+		xover_list.append([gen,x_over])
 		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','wb')
 		pickle.dump(xover_list,x_over_file)
 		x_over_file.close()
