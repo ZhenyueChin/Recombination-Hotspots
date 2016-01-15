@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import community
 from community import *
+import pickle
 
 class GRN(object):
 	'''
@@ -119,27 +120,35 @@ class GRN(object):
 	def get_connectedness(self):
 		return np.count_nonzero(self.edges)
 
-	def crossover(net1,net2,E):
+	def crossover(net1,net2,E,core,trial_counter):
 		'''
 		select appropriate crossover based on E, and record the crossover point
 		'''
 		if(E==2):
-			c1,c2,x_over =  E2_naive_crossover(net1,net2)
+			c1,c2,x_over =  GRN.E2_naive_crossover(net1,net2)
 		elif(E==3):
-			c1,c2,x_over =  E3_fixed_crossover(net1,net2)
+			c1,c2,x_over =  GRN.E3_fixed_crossover(net1,net2)
 		elif(E==4):
-			c1,c2,x_over =  E4_evolved_crossover(net1,net2)
+			c1,c2,x_over =  GRN.E4_evolved_crossover(net1,net2)
 		elif(E==5):
-			c1,c2,x_over =  E5_modularity_crossover(net1,net2)
+			c1,c2,x_over =  GRN.E5_modularity_crossover(net1,net2)
 		else:
 			print "invalid E value"
 
-		with open('networks/crossovers.pickle', 'rb') as handle:
-  			xover_list = pickle.load(handle)
-  			xover_list.add(x_over)
+
+		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','rb')
+		xover_list = pickle.load(x_over_file)
+		x_over_file.close()
+		xover_list.append(x_over)
+		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','wb')
+		pickle.dump(xover_list,x_over_file)
+		x_over_file.close()
+
+	
+  			
 
   		return c1,c2
-  		
+
 	def E5_get_xover_dist(self):
 		'''
 		get the probabilistic xover distribution based purely on modularity ratings of the 9 possible xover indexes

@@ -59,8 +59,7 @@ def print_summary_stats(top_performers):
 	print "number of top performers: "+str(len(top_performers))
 	print "avg fitness for percentile: "+str(np.mean([i.fitness for i in top_performers]))
 	print "avg mod for percentile: "+str(np.mean([i.measure_modularity() for i in top_performers]))
-
-def main(v):
+def compare_two_sets(exp1,exp2):
 	# v = v[1:]
 	# for el in range(10):
 	# 	v[el] = int(v[el])
@@ -92,8 +91,7 @@ def main(v):
 
 	# individual.visualize_network()
 
-	exp1 = "E3"
-	exp2 = "E4"
+
 	percentile = 95
 	trial_1_populationsA = []
 	trial_1_populationsB = []
@@ -191,4 +189,10 @@ def main(v):
 	for start_state in attractor_sets[0]:
   		individual.visualize_network(start_state,target_state,max_cycle)
   		temp = raw_input("enter to end")
+def main(v):
+	# compare_two_sets("E2","E3")
+	with open('networks/fitCurve2_4_0.pickle', 'rb') as handle:
+  		for pop in pickle.load(handle):
+  			print pop
+	
 main(sys.argv)

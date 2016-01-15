@@ -134,7 +134,7 @@ def average_fitness(population):
 		total+=individual.fitness
 	return float(total)/len(population)
 #@profile
-def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks,attractor_sets):
+def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_targets,population,number_perfect_networks,attractor_sets,core,E):
 	'''
 	I will evolve populations of GRNs mirroring the initial results
 	"Specialization Increases Modularity" in the original paper, but using an
@@ -147,7 +147,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	#initial network: 200 networks with identical randomized edges:
 	network_size = len(targetA)
 	#initial_edges = model.GRN.initialize_edges(network_size,network_size)
-	E=5
+	
 	#Find fitness for each individual:
 	for individual in population:
 		model.GRN.evaluate_network(individual,max_cycle,num_targets,attractor_sets)
@@ -159,6 +159,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	gens=0
 	best_networks= list()
 	#while(len(best_networks)<number_perfect_networks):
+	fit_curve=[]
 	for gen in range(generations):
 		if(gens%100==0):
 			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations"
@@ -174,41 +175,44 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			# #crossover
 			if(i<len(population)/2 and num_targets>1):
 				if(i%2==0):
-					xover_children = model.GRN.crossover(individual,population[i+1],E) #make sure this is the correct index
-					#XOVER CHILDREN NOT TESTED FOR BEST NETWORK
+					xover_children = model.GRN.crossover(individual,population[i+1],E,core,run_number) #make sure this is the correct index
 					next_gen.extend(xover_children)
 			else:
 				child = individual.copy()
 				child.perturb(mu)
-				model.GRN.evaluate_network(child,max_cycle,num_targets,attractor_sets)
-				if child.fitness > best.fitness:
-					best = child
 				#print best.fitness
 				next_gen.append(child)
-		population.extend(next_gen)
-		
+
 		#one extra random network is added at zero age:
 		new_individual = model.GRN(targetA,max_cycle,model.GRN.initialize_edges(network_size,network_size))
-		model.GRN.evaluate_network(new_individual,max_cycle,num_targets,attractor_sets)
-		population.append(new_individual)
-		if new_individual.fitness > best.fitness:
-			best = new_individual
-			#print "random individual had best: ",best.fitness
-			#print "new best with fitness: ",best.fitness
+		next_gen.append(new_individual)
+
+		for i in next_gen:
+			model.GRN.evaluate_network(i,max_cycle,num_targets,attractor_sets)
+			if i.fitness > best.fitness:
+				best = i
+			if i.fitness == 1:
+				with open('networks/first_best'+str(E)+'_'+str(sys.argv[4])+'_'+str(run_number)+'.pickle', 'rb') as handle:
+					best_list = pickle.load(handle)
+					best_list.append([gen,i])
+		population.extend(next_gen)
+		fit_curve.append(best.fitness)
+
+
 
 		#check for termination:
-		if(best.fitness==1):
-			print "new best"
-			best.visualize_network
-			#print "optimal fitness found"
-			#print "network with fitness 1 found"
-			best_networks.append(best)
-			#remove other networks of same age
-			population.remove(best)
-			for ind in population:
-				if ind.genetic_age==best.genetic_age:
-					population.remove(ind)
-			best = population[0]
+		# if(best.fitness==1):
+		# 	print "new best"
+		# 	best.visualize_network
+		# 	#print "optimal fitness found"
+		# 	#print "network with fitness 1 found"
+		# 	best_networks.append(best)
+		# 	#remove other networks of same age
+		# 	population.remove(best)
+		# 	for ind in population:
+		# 		if ind.genetic_age==best.genetic_age:
+		# 			population.remove(ind)
+		# 	best = population[0]
 
 		#now our population is of size 2k+1, time for tournaments:
 		eliminated = []
@@ -225,12 +229,18 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 		#update_progress((gen*1.0*run_number)/((generations-1)*num_runs))
 		#update_progress((run_number*1.0)/(num_runs))
 		#print " Population size: ",len(population)
+	#dump the fit curve
+	fit_file = open('networks/fitCurve'+str(E)+'_'+str(num_targets)+'_'+core+'_'+str(run_number)+'.pickle','wb')
+	pickle.dump(fit_curve,fit_file)
+	fit_file.close()
 	if(len(best_networks)>0):
 		return population,best_networks
 	else:
 		return population,[best]
 
 def main():
+	
+	E=2
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
 
@@ -301,7 +311,9 @@ def main():
 	with open(seedsfile+'.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
 	for seed in seeds:
-		trial_counter+=1
+		pickle.dump([],open('networks/first_best'+str(E)+'_'+str(sys.argv[4])+'_'+str(trial_counter)+'.pickle','wb'))
+		pickle.dump([],open('networks/crossovers'+str(E)+'_'+str(sys.argv[4])+'_'+str(trial_counter)+'.pickle','wb'))
+		
 		rand.seed(seed)
 		new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
 		print new_network.measure_modularity()
@@ -313,7 +325,7 @@ def main():
 
 		#trial for target A only
 		generations=500
-		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
 		#q_values_single.append(average_modularity(best_networks))
 		#fitness_single.append(average_fitness(best_networks))
 
@@ -327,7 +339,7 @@ def main():
 		generations=1500
 		population.extend(best_networks)
 		#rand.seed(seed)
-		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
 		#q_values_two.append(average_modularity(best_networks))
 		#fitness_two.append(average_fitness(best_networks))
 		print "[targets: "+sys.argv[4]+"] for target A and B, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))		
@@ -341,4 +353,5 @@ def main():
 		# pickle.dump( q_values_single, open( 'output/'+outfile1+".pickle", "wb" ) )
 		# pickle.dump( q_values_two, open( 'output/'+outfile2+".pickle", "wb" ) )
 		print "finished trial ",trial_counter
+		trial_counter+=1
 main()
