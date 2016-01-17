@@ -8,6 +8,7 @@ import networkx as nx
 import community
 from community import *
 import pickle
+import math
 
 class GRN(object):
 	'''
@@ -316,6 +317,11 @@ class GRN(object):
 				#print "mutating gene "+str(i)+"!"
 				self.mutate(i)
 
+		#for now, this also holds true for xover preference:
+		for i in range(self.crossover_preference):
+			if(rand.random()<=mu):
+				self.mutate_meta_xover(i)
+
 	def mutate(self,i):
 		'''
 		Mutates the specified gene at index i according to the rule specified in page 9 of the original paper.
@@ -355,18 +361,19 @@ class GRN(object):
 					self.edges[toAdd,i]=-1
 					#print "added negative edge from "+str(toAdd)+" to "+str(i)
 				
-		self.mutate_meta_xover()
+		
 
-	def mutate_meta_xover(self):
+	def mutate_meta_xover(self,src_index):
 		'''
 		mutates the metainformation array dictating xover probability in different indexes.
 		'''
-		src_index = rand.randint(0,len(self.crossover_preference)-1)
-		dest_index = rand.randint(0,len(self.crossover_preference)-1)
-		transfer_amt = rand.uniform(0,self.crossover_preference[src_index])
-		dest_index+=transfer_amt
-		src_index-=transfer_amt
-		
+
+		#choose magnitude of mutation from random gaussian
+		self.crossover_preference[src_index] = math.fabs(rand.gauss(self.crossover_preference[src_index],
+													      math.fabs(self.crossover_preference[src_index])))
+		#re-normalize the matrix
+		self.crossover_preference =[float(i)/sum(self.crossover_preference) for i in self.crossover_preference]
+	
 	#@profile
 	def update_state(self,t):
 		'''
