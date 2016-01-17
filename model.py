@@ -318,7 +318,7 @@ class GRN(object):
 				self.mutate(i)
 
 		#for now, this also holds true for xover preference:
-		for i in range(self.crossover_preference):
+		for i in range(len(self.crossover_preference)):
 			if(rand.random()<=mu):
 				self.mutate_meta_xover(i)
 
@@ -372,7 +372,7 @@ class GRN(object):
 		self.crossover_preference[src_index] = math.fabs(rand.gauss(self.crossover_preference[src_index],
 													      math.fabs(self.crossover_preference[src_index])))
 		#re-normalize the matrix
-		self.crossover_preference =[float(i)/sum(self.crossover_preference) for i in self.crossover_preference]
+		self.crossover_preference = np.array([float(i)/sum(self.crossover_preference) for i in self.crossover_preference])
 	
 	#@profile
 	def update_state(self,t):
