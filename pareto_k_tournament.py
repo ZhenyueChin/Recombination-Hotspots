@@ -8,9 +8,24 @@ import model
 import sys
 import pickle
 import time
+from time import gmtime,strftime
 
 
+def generate_permutations(original):
+	'''
+	generates all pair permutations of the original matrix
+	'''
+	attractor_sets=[]
+	for i in range(10):
+		new = original[:]
+		new[i]=new[i]*(-1)
 
+		attractor_sets.append(new)
+		for j in range(i+1,10):
+			newer = new[:]
+			newer[j]=new[j]*(-1)
+			attractor_sets.append(newer)
+	return attractor_sets
 
 def generate_initial_attractors(target,set_size,p):
 	'''
@@ -162,7 +177,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	fit_curve=[]
 	for gen in range(generations):
 		if(gens%100==0):
-			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations"
+			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations: "+strftime("%Y-%m-%d %I:%M:%S")
 			print "best fitness so far: "+str(best.fitness)
 		gens+=1
 		#each network is evaluated, and mutated
@@ -173,7 +188,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			individual=population[i]
 			individual.genetic_age+=1
 			# #crossover
-			if(i<len(population)/2 and num_targets>1):
+			if(i<len(population)/2 and num_targets>1 and E!=1):
 				if(i%2==0):
 					xover_children = model.GRN.crossover(individual,population[i+1],E,core,run_number,gen) #make sure this is the correct index
 					next_gen.extend(xover_children)
@@ -191,12 +206,14 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 			model.GRN.evaluate_network(i,max_cycle,num_targets,attractor_sets)
 			if i.fitness > best.fitness:
 				best = i
-			if i.fitness == 1:
-				with open('networks/first_best'+str(E)+'_'+str(sys.argv[4])+'_'+str(run_number)+'.pickle', 'rb') as handle:
-					best_list = pickle.load(handle)
-					best_list.append([gen,i])
+				if (i.fitness == 1.0):
+					with open('networks/first_best'+str(E)+'_'+str(sys.argv[4]+'_'+str(run_number))+'.pickle', 'rb') as handle:
+						best_list = pickle.load(handle)
+						best_list.append([gen,i])
+					with open('networks/first_best'+str(E)+'_'+str(sys.argv[4])+'_'+str(run_number)+'.pickle', 'wb') as handle:
+						pickle.dump(best_list,handle)
 		population.extend(next_gen)
-		fit_curve.append(best.fitness)
+		fit_curve.append(best)
 
 
 
@@ -233,6 +250,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	fit_file = open('networks/fitCurve'+str(E)+'_'+str(num_targets)+'_'+core+'_'+str(run_number)+'.pickle','wb')
 	pickle.dump(fit_curve,fit_file)
 	fit_file.close()
+	print "finished part, best fitness so far: "+str(best.fitness)
 	if(len(best_networks)>0):
 		return population,best_networks
 	else:
@@ -240,34 +258,37 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 def main():
 	
-	E=2
+	E=1
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
 
-	attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
-						[1,1,-1,1,-1,1,-1,1,-1,1],
-						[-1,-1,-1,1,-1,1,-1,1,-1,1],
-						[-1,1,1,1,-1,1,-1,1,-1,1],
-						[-1,1,-1,-1,-1,1,-1,1,-1,1],
-						[-1,1,-1,1,1,1,-1,1,-1,1],
-						[-1,1,-1,1,-1,-1,-1,1,-1,1],
-						[-1,1,-1,1,-1,1,1,1,-1,1],
-						[-1,1,-1,1,-1,1,-1,-1,-1,1],
-						[-1,1,-1,1,-1,1,-1,1,1,1],
-						[-1,1,-1,1,-1,1,-1,1,-1,-1]
-						],
-					  [[-1,1,-1,1,-1,-1,1,-1,1,-1],
-					  [1,1,-1,1,-1,-1,1,-1,1,-1],
-					  [-1,-1,-1,1,-1,-1,1,-1,1,-1],
-					  [-1,1,1,1,-1,-1,1,-1,1,-1],
-					  [-1,1,-1,-1,-1,-1,1,-1,1,-1],
-					  [-1,1,-1,1,1,-1,1,-1,1,-1],
-					  [-1,1,-1,1,-1,1,1,-1,1,-1],
-					  [-1,1,-1,1,-1,-1,-1,-1,1,-1],
-					  [-1,1,-1,1,-1,-1,1,1,1,-1],
-					  [-1,1,-1,1,-1,-1,1,-1,-1,-1],
-					  [-1,1,-1,1,-1,-1,1,-1,1,1]
-					  ]]
+	# attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
+	# 					[1,1,-1,1,-1,1,-1,1,-1,1],
+	# 					[-1,-1,-1,1,-1,1,-1,1,-1,1],
+	# 					[-1,1,1,1,-1,1,-1,1,-1,1],
+	# 					[-1,1,-1,-1,-1,1,-1,1,-1,1],
+	# 					[-1,1,-1,1,1,1,-1,1,-1,1],
+	# 					[-1,1,-1,1,-1,-1,-1,1,-1,1],
+	# 					[-1,1,-1,1,-1,1,1,1,-1,1],
+	# 					[-1,1,-1,1,-1,1,-1,-1,-1,1],
+	# 					[-1,1,-1,1,-1,1,-1,1,1,1],
+	# 					[-1,1,-1,1,-1,1,-1,1,-1,-1]
+	# 					],
+	# 				  [[-1,1,-1,1,-1,-1,1,-1,1,-1],
+	# 				  [1,1,-1,1,-1,-1,1,-1,1,-1],
+	# 				  [-1,-1,-1,1,-1,-1,1,-1,1,-1],
+	# 				  [-1,1,1,1,-1,-1,1,-1,1,-1],
+	# 				  [-1,1,-1,-1,-1,-1,1,-1,1,-1],
+	# 				  [-1,1,-1,1,1,-1,1,-1,1,-1],
+	# 				  [-1,1,-1,1,-1,1,1,-1,1,-1],
+	# 				  [-1,1,-1,1,-1,-1,-1,-1,1,-1],
+	# 				  [-1,1,-1,1,-1,-1,1,1,1,-1],
+	# 				  [-1,1,-1,1,-1,-1,1,-1,-1,-1],
+	# 				  [-1,1,-1,1,-1,-1,1,-1,1,1]
+	# 				  ]]
+	attractor_sets=[generate_permutations(target_attractors[0]),
+					generate_permutations(target_attractors[1])
+					]
 	# attractor_sets=[list(),list()]
 	# attractor_sets[0].append(target_attractors[0])
 	# attractor_sets[1].append(target_attractors[1])
@@ -294,7 +315,7 @@ def main():
 	number_perfect_networks=int(sys.argv[4])
 
 	pop_size =100 #target number of nondominated individuals
-	generations = 500
+	#generations = 500
 	mu = 0.05
 	p=0.15
 
@@ -306,7 +327,8 @@ def main():
 	trial_counter=0
 	final_population_single=[]
 	final_population_two=[]
-	max_cycle = 50 #just let me test this
+	max_cycle = 20 #just let me test this
+	
 	
 	with open(seedsfile+'.pickle', 'rb') as handle:
 		seeds = pickle.load(handle)
@@ -324,7 +346,7 @@ def main():
 			population.append(new_network) #initially randomized
 
 		#trial for target A only
-		generations=500
+		generations=300
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
 		#q_values_single.append(average_modularity(best_networks))
 		#fitness_single.append(average_fitness(best_networks))
@@ -336,7 +358,7 @@ def main():
 		#for i in range(len(best_networks)):
 		pickle.dump(final_population_single,open('networks/populationsA'+sys.argv[4]+'.pickle','wb'))
 		#and trial for target A and B
-		generations=1500
+		generations=750
 		population.extend(best_networks)
 		#rand.seed(seed)
 		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),2,population,number_perfect_networks,attractor_sets,sys.argv[4],E)

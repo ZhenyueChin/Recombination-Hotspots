@@ -10,7 +10,7 @@ import pickle
 import model
 from scipy import stats
 max_cycle=20
-attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
+attractor_sets = [[ 	[-1,1,-1,1,-1,1,-1,1,-1,1],
 						[1,1,-1,1,-1,1,-1,1,-1,1],
 						[-1,-1,-1,1,-1,1,-1,1,-1,1],
 						[-1,1,1,1,-1,1,-1,1,-1,1],
@@ -20,7 +20,7 @@ attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
 						[-1,1,-1,1,-1,1,1,1,-1,1],
 						[-1,1,-1,1,-1,1,-1,-1,-1,1],
 						[-1,1,-1,1,-1,1,-1,1,1,1],
-						[-1,1,-1,1,-1,1,-1,1,-1,-1]
+						[-1,1,-1,1,-1,1,-1,1,-1,-1],
 						],
 					  [[-1,1,-1,1,-1,-1,1,-1,1,-1],
 					  [1,1,-1,1,-1,-1,1,-1,1,-1],
@@ -107,23 +107,24 @@ def compare_two_sets(exp1,exp2):
 
 	plt.show() 
 
-  	# with open('networks/'+exp1+'/populationsA.pickle', 'rb') as handle:
-  	# 	trial_1_populationsA+=(pickle.load(handle))[0]
-  	# 	print "\n"
-  	# 	print len(trial_1_populationsA)
-  	with open('networks/'+exp1+'/run2/populationsB.pickle', 'rb') as handle:
+
+  	with open('networks/populationsA1.pickle', 'rb') as handle:
+  		for pop in pickle.load(handle):
+  			trial_1_populationsB+=get_top_performers(percentile,pop,1)
+
+  	with open('networks/populationsB1.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
   			trial_1_populationsB+=get_top_performers(percentile,pop,2)
   	# with open('networks/'+exp1+'/populationsB.pickle', 'rb') as handle:
   	# 	trial_1_populationsB+=(pickle.load(handle))[0]
 
-  	with open('networks/'+exp2+'/run2/populationsA.pickle', 'rb') as handle:
+  	with open('networks/populationsA2.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
   			trial_2_populationsA+=get_top_performers(percentile,pop,1)
   	# with open('networks/'+exp2+'/populationsB.pickle', 'rb') as handle:
   	# 	trial_2_populationsA+=(pickle.load(handle))[0]
 
-  	with open('networks/'+exp2+'/run2/populationsB.pickle', 'rb') as handle:
+  	with open('networks/populationsB2.pickle', 'rb') as handle:
   		for pop in pickle.load(handle):
   			trial_2_populationsB+=get_top_performers(percentile,pop,2)
   	# with open('networks/'+exp2+'/populationsB.pickle', 'rb') as handle:
@@ -189,10 +190,14 @@ def compare_two_sets(exp1,exp2):
 	for start_state in attractor_sets[0]:
   		individual.visualize_network(start_state,target_state,max_cycle)
   		temp = raw_input("enter to end")
-def main(v):
+def list_values(filename):
 	# compare_two_sets("E2","E3")
-	with open('networks/fitCurve2_4_0.pickle', 'rb') as handle:
+	with open(filename, 'rb') as handle:
   		for pop in pickle.load(handle):
+  			# print len(pop)
   			print pop
+def main(v):
+	#compare_two_sets("E2","E2")
+	list_values('networks/first_best1_1_0.pickle')
 	
 main(sys.argv)

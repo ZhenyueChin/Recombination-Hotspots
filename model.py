@@ -112,8 +112,8 @@ class GRN(object):
 		# for attractor_set in range(num_targets):
 		# 	for attractor in attractor_sets[attractor_set]:
 		# 		tot_starting_attractors+=1
-		tot_starting_attractors = 11*num_targets
-
+		#tot_starting_attractors = 11*num_targets
+		tot_starting_attractors = float(num_targets)*len(attractor_sets[0])
 		self.fitness= tot_fitness/tot_starting_attractors
 		return self.fitness
 
@@ -135,14 +135,14 @@ class GRN(object):
 		else:
 			print "invalid E value"
 
-
-		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','rb')
-		xover_list = pickle.load(x_over_file)
-		x_over_file.close()
-		xover_list.append([gen,x_over])
-		x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','wb')
-		pickle.dump(xover_list,x_over_file)
-		x_over_file.close()
+		if(E!=1):
+			x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','rb')
+			xover_list = pickle.load(x_over_file)
+			x_over_file.close()
+			xover_list.append([gen,x_over])
+			x_over_file = open('networks/crossovers'+str(E)+'_'+core+'_'+str(trial_counter)+'.pickle','wb')
+			pickle.dump(xover_list,x_over_file)
+			x_over_file.close()
 
 	
   			
