@@ -169,10 +169,28 @@ class GRN(object):
 			partition = dict.fromkeys(seq1,0)
 			partition.update(dict.fromkeys(seq2,1))
 			modularity_ratings[i-1]=(community.modularity(partition,gr))
-		return modularity_ratings
+
+		return GRN.normalize_to_prob_distribution(modularity_ratings)
+
+	@staticmethod
+	def normalize_to_prob_distribution(dist):
+		'''
+		note: only to be used when list contains negative elements, as it does un-flatten the distribution slightly
+		'''
+		#normalize the list to be positive
+		dist+=math.fabs(min(dist))
+		# and sum to one:
+		return np.array([float(i)/sum(dist) for i in dist])
+		
 
 	@staticmethod
 	def sample_from_prob_distribution(distribution):
+		if(sum(distribution)<0.99 or sum(distribution)>1.01):
+			print "Error in distribution! Does not sum to 1!"
+			print distribution
+			print sum(distribution)
+		# make sure it sums to one:
+		distribution = np.array([float(i)/sum(distribution) for i in distribution])
 		choice=rand.random()
 		tot=0
 		x_point=0
@@ -213,7 +231,9 @@ class GRN(object):
 		'''
 		
 		#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
-		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
+		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2.0
+		print sum(net1.crossover_preference)
+		print sum(net2.crossover_preference)
 		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 		
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
@@ -308,7 +328,7 @@ class GRN(object):
 
 		return e
 
-	def perturb(self, mu):
+	def perturb(self, mu, E):
 		'''
 		Each gene (node) has a chance of mu to mutate
 		'''
@@ -318,9 +338,10 @@ class GRN(object):
 				self.mutate(i)
 
 		#for now, this also holds true for xover preference:
-		for i in range(len(self.crossover_preference)):
-			if(rand.random()<=mu):
-				self.mutate_meta_xover(i)
+		if(E==4):
+			for i in range(len(self.crossover_preference)):
+				if(rand.random()<=mu):
+					self.mutate_meta_xover(i)
 
 	def mutate(self,i):
 		'''
@@ -367,13 +388,19 @@ class GRN(object):
 		'''
 		mutates the metainformation array dictating xover probability in different indexes.
 		'''
-
+		oldtot=sum(self.crossover_preference)
 		#choose magnitude of mutation from random gaussian
 		self.crossover_preference[src_index] = math.fabs(rand.gauss(self.crossover_preference[src_index],
 													      math.fabs(self.crossover_preference[src_index])))
+		print "new value: "+str(self.crossover_preference[src_index])
 		#re-normalize the matrix
-		self.crossover_preference = np.array([float(i)/sum(self.crossover_preference) for i in self.crossover_preference])
-	
+		total = sum(self.crossover_preference)
+		self.crossover_preference = np.array([float(i)/total for i in self.crossover_preference])
+		newtot=sum(self.crossover_preference)
+		if(oldtot!=newtot):
+			print "mutated wrong! new and old tots:"
+			print newtot
+			print oldtot
 	#@profile
 	def update_state(self,t):
 		'''
