@@ -194,7 +194,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 					next_gen.extend(xover_children)
 			else:
 				child = individual.copy()
-				child.perturb(mu)
+				child.perturb(mu,E)
 				#print best.fitness
 				next_gen.append(child)
 
@@ -258,7 +258,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 def main():
 	
-	E=3
+	E=5
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
 
