@@ -267,7 +267,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 def main():
 	
-	E=5
+	E=4
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
 
@@ -356,12 +356,12 @@ def main():
 
 		#trial for target A only
 		generations=300
-		#population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
+		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
 		
 
-		with open('networks/E1/run3(allpairs)/populationsA'+str(sys.argv[4])+'.pickle', 'rb') as handle:
-			population = pickle.load(handle)[trial_counter]
-		best_networks=[]
+		# with open('networks/E1/run3(allpairs)/populationsA'+str(sys.argv[4])+'.pickle', 'rb') as handle:
+		# 	population = pickle.load(handle)[trial_counter]
+		# best_networks=[]
 		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 		population.extend(best_networks)
 		final_population_single.append(population)

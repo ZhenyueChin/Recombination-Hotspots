@@ -10,7 +10,7 @@ def call_sim(q,seedsfile, outfile1, outfile2, num_targets):
 q = Queue.Queue
 
 
-for i in range(4):
+for i in range(1):
 	t = threading.Thread(target=call_sim,args = (q,"seeds"+str(i),"out"+str(i)+"_1","out"+str(i)+"_2",str(i+1)))
 	t.daemon=True
 	t.start()

@@ -27,6 +27,7 @@ class GRN(object):
 		self.nodes = GRN.matrix_create(max_cycles,n)
 		if(crossover_preference is None):
 			crossover_preference = np.random.dirichlet(np.ones(9))
+			print "no prior xover"
 		self.crossover_preference=crossover_preference
 
 		if(e==[]):
@@ -35,7 +36,7 @@ class GRN(object):
 			self.edges = e
 		self.fitness = -1
 		self.genetic_age=age
-
+		print "xover pref at birth: "+str(sum(crossover_preference))+str(self.crossover_preference)
 	def __str__(self):
 		return "\n"+str(self.edges)+"\n"
 
@@ -44,7 +45,7 @@ class GRN(object):
 		deep copy
 		'''
 		#print self.nodes
-		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age,self.crossover_preference)
+		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age,np.copy(self.crossover_preference))
 
 	def measure_modularity(self):
 		'''
@@ -204,7 +205,7 @@ class GRN(object):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		
+		print "E5"
 		#E5: crossover index is derived probabilistically by modularity rating
 		net1.crossover_preference = net1.E5_get_xover_dist()
 		net2.crossover_preference = net2.E5_get_xover_dist()
@@ -231,21 +232,26 @@ class GRN(object):
 		'''
 		
 		#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
+		old_probability_matrices = [net1.crossover_preference,net2.crossover_preference]
+		print "at start: "+str(sum(net1.crossover_preference))
 		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2.0
 		print sum(net1.crossover_preference)
 		print sum(net2.crossover_preference)
 		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 		
+		prob_mat_choice = rand.choice([0,1])
 		child1=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
-				   new_probability_matrix)
+				   old_probability_matrices[prob_mat_choice])
 
 		child2=GRN(np.zeros(10),net1.nodes.shape[0],
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
-				   new_probability_matrix)
+				   old_probability_matrices[abs(prob_mat_choice-1)])
 		#print child1.edges
+		print "at end: "+str(sum(net1.crossover_preference))
+		print "and children: "+str(sum(child1.crossover_preference))+" "+str(sum(child2.crossover_preference))
 		return child1,child2,crossover_index
 
 	@staticmethod
@@ -388,19 +394,21 @@ class GRN(object):
 		'''
 		mutates the metainformation array dictating xover probability in different indexes.
 		'''
-		oldtot=sum(self.crossover_preference)
+		oldtot=math.fsum(self.crossover_preference)
 		#choose magnitude of mutation from random gaussian
 		self.crossover_preference[src_index] = math.fabs(rand.gauss(self.crossover_preference[src_index],
 													      math.fabs(self.crossover_preference[src_index])))
 		print "new value: "+str(self.crossover_preference[src_index])
 		#re-normalize the matrix
-		total = sum(self.crossover_preference)
+		total = math.fsum(self.crossover_preference)
 		self.crossover_preference = np.array([float(i)/total for i in self.crossover_preference])
-		newtot=sum(self.crossover_preference)
-		if(oldtot!=newtot):
+		newtot=math.fsum(self.crossover_preference)
+		if(oldtot-newtot>0.01 or oldtot-newtot<-0.01):
 			print "mutated wrong! new and old tots:"
 			print newtot
 			print oldtot
+			print "crossover_preference:"
+			print self.crossover_preference
 	#@profile
 	def update_state(self,t):
 		'''
