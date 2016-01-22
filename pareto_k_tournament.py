@@ -170,11 +170,14 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	#population[0].visualize_network(targetA,targetA,20)
 	#evolutionary loop is initiated:
 	best = population[0]
+	most_modular=population[0]
 	#print best.fitness
 	gens=0
 	best_networks= list()
 	#while(len(best_networks)<number_perfect_networks):
 	fit_curve=[]
+	mod_curve=[]
+	most_modular=population[0]
 	for gen in range(generations):
 		if(gens%100==0):
 			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations: "+strftime("%Y-%m-%d %I:%M:%S")
@@ -212,8 +215,11 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 						best_list.append([gen,i])
 					with open('networks/first_best'+str(E)+'_'+str(sys.argv[4])+'_'+str(run_number)+'.pickle', 'wb') as handle:
 						pickle.dump(best_list,handle)
+			if i.measure_modularity() > most_modular.measure_modularity():
+				most_modular=i
 		population.extend(next_gen)
 		fit_curve.append(best)
+		mod_curve.append(most_modular)
 
 
 
@@ -250,6 +256,9 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	fit_file = open('networks/fitCurve'+str(E)+'_'+str(num_targets)+'_'+core+'_'+str(run_number)+'.pickle','wb')
 	pickle.dump(fit_curve,fit_file)
 	fit_file.close()
+	mod_file = open('networks/modCurve'+str(E)+'_'+str(num_targets)+'_'+core+'_'+str(run_number)+'.pickle','wb')
+	pickle.dump(mod_curve,mod_file)
+	mod_file.close()
 	print "finished part, best fitness so far: "+str(best.fitness)
 	if(len(best_networks)>0):
 		return population,best_networks
