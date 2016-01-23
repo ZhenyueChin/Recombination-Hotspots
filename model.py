@@ -27,7 +27,7 @@ class GRN(object):
 		self.nodes = GRN.matrix_create(max_cycles,n)
 		if(crossover_preference is None):
 			crossover_preference = np.random.dirichlet(np.ones(9))
-			print "no prior xover"
+			#print "no prior xover"
 		self.crossover_preference=crossover_preference
 
 		if(e==[]):
@@ -36,7 +36,7 @@ class GRN(object):
 			self.edges = e
 		self.fitness = -1
 		self.genetic_age=age
-		print "xover pref at birth: "+str(sum(crossover_preference))+str(self.crossover_preference)
+		#print "xover pref at birth: "+str(sum(crossover_preference))+str(self.crossover_preference)
 	def __str__(self):
 		return "\n"+str(self.edges)+"\n"
 
@@ -233,10 +233,10 @@ class GRN(object):
 		
 		#E4: crossover index is derived from an average of the two crossing-over network meta-arrays
 		old_probability_matrices = [net1.crossover_preference,net2.crossover_preference]
-		print "at start: "+str(sum(net1.crossover_preference))
+		#print "at start: "+str(sum(net1.crossover_preference))
 		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2.0
-		print sum(net1.crossover_preference)
-		print sum(net2.crossover_preference)
+		#print sum(net1.crossover_preference)
+		#print sum(net2.crossover_preference)
 		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 		
 		prob_mat_choice = rand.choice([0,1])
@@ -250,8 +250,8 @@ class GRN(object):
 				   max(net1.genetic_age,net2.genetic_age),
 				   old_probability_matrices[abs(prob_mat_choice-1)])
 		#print child1.edges
-		print "at end: "+str(sum(net1.crossover_preference))
-		print "and children: "+str(sum(child1.crossover_preference))+" "+str(sum(child2.crossover_preference))
+		#print "at end: "+str(sum(net1.crossover_preference))
+		#print "and children: "+str(sum(child1.crossover_preference))+" "+str(sum(child2.crossover_preference))
 		return child1,child2,crossover_index
 
 	@staticmethod
@@ -398,7 +398,7 @@ class GRN(object):
 		#choose magnitude of mutation from random gaussian
 		self.crossover_preference[src_index] = math.fabs(rand.gauss(self.crossover_preference[src_index],
 													      math.fabs(self.crossover_preference[src_index])))
-		print "new value: "+str(self.crossover_preference[src_index])
+		#print "new value: "+str(self.crossover_preference[src_index])
 		#re-normalize the matrix
 		total = math.fsum(self.crossover_preference)
 		self.crossover_preference = np.array([float(i)/total for i in self.crossover_preference])

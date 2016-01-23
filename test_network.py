@@ -197,7 +197,14 @@ def list_values(filename):
   			# print len(pop)
   			print pop
 def count_values(filenames):
-	pot=[[0]*9]*15
+	'''
+	pot -> partitions over time
+	pop -> tuple [generation,index]
+	'''
+	cumulative=False
+	records_per_file = 18751
+	number_bins = 15
+	pot=[[0]*9]*number_bins
 	indexes=[0]*9
 	counter=0
 	for filename in filenames:
@@ -209,16 +216,24 @@ def count_values(filenames):
 	  			indexes[pop[1]-1]+=1
 	  			counter+=1
 
-	  			if pop[0]!=last_pop and pop[0]%49 == 0:
-
+	  			if counter%(records_per_file/number_bins)==0:
 	  				#pot.append(indexes)
-	  				print pot[row]
-	  				print indexes
+	  				#print pot[row]
+	  				#print indexes
+
 	  				pot[row] = [x + y for x, y in zip(pot[row], indexes)]
-	  				indexes=[0]*9
+	  				if( not cumulative):
+	  					indexes=[0]*9
 	  				row+=1
+	  				
 	  			last_pop = pop[0]
-	pot[0][4]-=70
+	  	print counter
+	#pot[0][4]-=70
+	tot=0
+	for i in pot:
+		print str(i)+str(sum(i))
+		tot+=sum(i)
+	print tot
   	return pot
 def rectangle_visualization(pot):
 	'''
@@ -257,10 +272,36 @@ def generate_permutations(original):
 			newer[j]=new[j]*(-1)
 			attractor_sets.append(newer)
 	return attractor_sets
+
 def main(v):
 	#compare_two_sets("E2","E2")
-	#partitions_over_time = count_values(['networks/crossovers5_1_0.pickle','networks/crossovers5_1_1.pickle','networks/crossovers5_1_2.pickle'])
-	#rectangle_visualization(partitions_over_time)
+	# partitions_over_time = count_values(['networks/crossovers4_1_0.pickle',
+	# 									'networks/crossovers4_1_1.pickle',
+	# 									'networks/crossovers4_1_2.pickle',
+	# 									'networks/crossovers4_2_0.pickle',
+	# 									'networks/crossovers4_2_1.pickle',
+	# 									'networks/crossovers4_2_2.pickle',
+	# 									'networks/crossovers4_3_0.pickle',
+	# 									'networks/crossovers4_3_1.pickle',
+	# 									'networks/crossovers4_3_2.pickle',
+	# 									'networks/crossovers4_4_0.pickle',
+	# 									'networks/crossovers4_4_1.pickle',
+	# 									'networks/crossovers4_4_2.pickle',])
+	partitions_over_time = count_values(['networks/E5/run4(allpairs)/crossovers5_1_0.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_1_1.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_1_2.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_3_0.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_3_1.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_3_2.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_2_0.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_2_1.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_2_2.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_4_0.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_4_1.pickle',
+										'networks/E5/run4(allpairs)/crossovers5_4_2.pickle',
+										])
+
+	rectangle_visualization(partitions_over_time)
 
 	# with open('networks/populationsA2.pickle', 'rb') as handle:
  #  		for pop in pickle.load(handle):
@@ -270,32 +311,32 @@ def main(v):
 	#   				print sum(pop[i].crossover_preference)
 	#   				print pop[i].crossover_preference
 	#   			print pop[i].crossover_preference
-	trial1 = '5'
-	trial2 = '1'
-	bestsA=[]
-	for core in range(1,5):
-		for trial in range(0,3):
-			with open('networks/E'+trial1+'/run3(allpairs)/fitCurve'+trial1+'_2_'+str(core)+'_'+str(trial)+'.pickle', 'rb') as handle:
-		  		pop = pickle.load(handle).pop()
-		  		bestsA.append(pop.fitness)
-		  		if(pop.fitness==1):
-		  			print "got one"
-		  			toShow = pop
+	# trial1 = '5'
+	# trial2 = '1'
+	# bestsA=[]
+	# for core in range(1,5):
+	# 	for trial in range(0,3):
+	# 		with open('networks/E'+trial1+'/run3(allpairs)/fitCurve'+trial1+'_2_'+str(core)+'_'+str(trial)+'.pickle', 'rb') as handle:
+	# 	  		pop = pickle.load(handle).pop()
+	# 	  		bestsA.append(pop.fitness)
+	# 	  		if(pop.fitness==1):
+	# 	  			print "got one"
+	# 	  			toShow = pop
 
-	bestsB = []
-	for core in range(1,5):
-		for trial in range(0,3):
-			with open('networks/E'+trial2+'/run3(allpairs)/fitCurve'+trial2+'_2_'+str(core)+'_'+str(trial)+'.pickle', 'rb') as handle:
-		  		pop = pickle.load(handle).pop()
-		  		bestsB.append(pop)
-	print "avg fitness for "+trial1+": "+str(np.mean([i for i in bestsA]))
-	print "avg fitness for "+trial2+": "+str(np.mean([i for i in bestsB]))
+	# bestsB = []
+	# for core in range(1,5):
+	# 	for trial in range(0,3):
+	# 		with open('networks/E'+trial2+'/run3(allpairs)/fitCurve'+trial2+'_2_'+str(core)+'_'+str(trial)+'.pickle', 'rb') as handle:
+	# 	  		pop = pickle.load(handle).pop()
+	# 	  		bestsB.append(pop)
+	# print "avg fitness for "+trial1+": "+str(np.mean([i for i in bestsA]))
+	# print "avg fitness for "+trial2+": "+str(np.mean([i for i in bestsB]))
 
-	print "\nt value for comparing fitness:"
-	t, p = stats.ttest_ind(bestsA,bestsB)
-	print "ttest_ind: t = %g  p = %g" % (t, p)
+	# print "\nt value for comparing fitness:"
+	# t, p = stats.ttest_ind(bestsA,bestsB)
+	# print "ttest_ind: t = %g  p = %g" % (t, p)
 
 
-	toShow.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "TargetB, Fitness = "+str(toShow.fitness))
-	toShow.visualize_network([-1,-1,-1,1,-1,1,1,-1,1,-1],[-1,1,-1,1,-1,-1,1,-1,1,-1],20)
+	# toShow.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "TargetB, Fitness = "+str(toShow.fitness))
+	# toShow.visualize_network([-1,-1,-1,1,-1,1,1,-1,1,-1],[-1,1,-1,1,-1,-1,1,-1,1,-1],20)
 main(sys.argv)
