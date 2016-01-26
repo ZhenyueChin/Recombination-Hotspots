@@ -220,7 +220,7 @@ def fig3_E1_fitcurve_modcurve():
 	plt.plot(mods)
 	plt.show()
 
-def fig4_barcharts():
+def fig4_barcharts_modularity():
 	'''
 	I am going to try and use plotly for this. The function simply dumps csvs
 	'''
@@ -246,6 +246,31 @@ def fig4_barcharts():
 					  			if net.measure_modularity()>best.measure_modularity():
 					  				best = net
 					  		fitnesses[e].append(best.measure_modularity())
+
+	#the above only accounts for the first two trials. 
+	e=1
+	folder=2
+	for core in range(4):
+		for seed in range(3):
+			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+		  		netsB = pickle.load(handle)
+		  		best=netsB[0]
+		  		for net in netsB:
+		  			if net.measure_modularity()>best.measure_modularity():
+		  				best = net
+		  		fitnesses[e].append(best.measure_modularity())
+
+	e=4
+	folder=2
+	for core in range(4):
+		for seed in range(3):
+			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+		  		netsB = pickle.load(handle)
+		  		best=netsB[0]
+		  		for net in netsB:
+		  			if net.measure_modularity()>best.measure_modularity():
+		  				best = net
+		  		fitnesses[e].append(best.measure_modularity())
 	print fitnesses
 	stats=[]
 	for i in fitnesses:
@@ -253,6 +278,67 @@ def fig4_barcharts():
 		std = np.std(i)
 		stats.append([avg,std])
 	with open('modularities.csv', 'w') as fp:
+	    a = csv.writer(fp, delimiter=',')
+
+	    a.writerows(stats)
+def fig4_barcharts_fitness():
+	'''
+	I am going to try and use plotly for this. The function simply dumps csvs
+	'''
+	fitnesses=[[],[],[],[],[]]
+	print fitnesses
+	for e in range(5):
+		for folder in range(2):
+			for core in range(4):
+				for seed in range(3):
+					if(e==0):
+						with open('networks/E'+str(e+1)+'/run'+str(folder+2)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.fitness>best.fitness:
+					  				best = net
+					  		fitnesses[e].append(best.fitness)
+					else:
+						with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.fitness>best.fitness:
+					  				best = net
+					  		fitnesses[e].append(best.fitness)
+
+	#the above only accounts for the first two trials. 
+	e=1
+	folder=2
+	for core in range(4):
+		for seed in range(3):
+			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+		  		netsB = pickle.load(handle)
+		  		best=netsB[0]
+		  		for net in netsB:
+		  			if net.fitness>best.fitness:
+		  				best = net
+		  		fitnesses[e].append(best.fitness)
+
+	e=4
+	folder=2
+	for core in range(4):
+		for seed in range(3):
+			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+		  		netsB = pickle.load(handle)
+		  		best=netsB[0]
+		  		for net in netsB:
+		  			if net.fitness>best.fitness:
+		  				best = net
+		  		fitnesses[e].append(best.fitness)
+	print fitnesses
+	stats=[]
+	for i in fitnesses:
+		avg = np.mean(i)
+		std = np.std(i)
+		stats.append([avg,std])
+	with open('fitnesses.csv', 'w') as fp:
 	    a = csv.writer(fp, delimiter=',')
 
 	    a.writerows(stats)
@@ -465,6 +551,6 @@ def main():
 	# fig1_netowork_view()
 	# fig2_network_behavior()
 	# fig3_E1_fitcurve_modcurve()
-	fig4_barcharts()
+	fig4_barcharts_fitness()
 	# fig5_6_xover_freqs()
 main()
