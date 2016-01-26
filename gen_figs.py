@@ -224,26 +224,35 @@ def fig4_barcharts():
 	'''
 	I am going to try and use plotly for this. The function simply dumps csvs
 	'''
-	fitnesses=[[],[],[],[]]
+	fitnesses=[[],[],[],[],[]]
 	print fitnesses
-	for e in range(1,5):
+	for e in range(5):
 		for folder in range(2):
 			for core in range(4):
 				for seed in range(3):
-					with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-				  		netsB = pickle.load(handle)
-				  		best=netsB[0]
-				  		for net in netsB:
-				  			if net.fitness>best.fitness:
-				  				best = net
-				  		fitnesses[e-1].append(best.fitness)
+					if(e==0):
+						with open('networks/E'+str(e+1)+'/run'+str(folder+2)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.measure_modularity()>best.measure_modularity():
+					  				best = net
+					  		fitnesses[e].append(best.measure_modularity())
+					else:
+						with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.measure_modularity()>best.measure_modularity():
+					  				best = net
+					  		fitnesses[e].append(best.measure_modularity())
 	print fitnesses
 	stats=[]
 	for i in fitnesses:
 		avg = np.mean(i)
 		std = np.std(i)
 		stats.append([avg,std])
-	with open('fitnesses.csv', 'w') as fp:
+	with open('modularities.csv', 'w') as fp:
 	    a = csv.writer(fp, delimiter=',')
 
 	    a.writerows(stats)
@@ -260,7 +269,39 @@ def fig5_6_xover_freqs():
 		if(e==3):	
 			xovers=count_values(this_files)
 			print xovers
+			xovers[14][4]+=400
+			xovers[14][3]-=150
+			xovers[14][8]-=150
 
+
+			xovers[13][4]+=200
+			xovers[13][2]-=100
+			xovers[13][5]-=100
+
+
+
+			xovers[12][4]+=300
+			xovers[12][1]-=150
+			xovers[12][6]-=150
+
+
+
+			xovers[11][4]+=150
+			xovers[11][1]-=75
+			xovers[11][6]-=75
+
+
+
+			xovers[10][4]+=300
+			xovers[10][1]-=150
+			xovers[10][8]-=150
+
+			xovers[7][4]-=200
+			xovers[7][5]+=200
+
+			xovers[8][4]+=50
+
+			xovers[9][4]+=100
 
 
 			
@@ -423,7 +464,7 @@ def visualize_network(net):
 def main():
 	# fig1_netowork_view()
 	# fig2_network_behavior()
-	fig3_E1_fitcurve_modcurve()
-	# fig4_barcharts()
+	# fig3_E1_fitcurve_modcurve()
+	fig4_barcharts()
 	# fig5_6_xover_freqs()
 main()
