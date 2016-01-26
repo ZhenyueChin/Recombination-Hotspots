@@ -177,12 +177,13 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	#while(len(best_networks)<number_perfect_networks):
 	fit_curve=[]
 	mod_curve=[]
-	most_modular=population[0]
+	
 	for gen in range(generations):
 		if(gens%100==0):
 			print "targets: "+str(number_perfect_networks)+" just passed "+str(gens)+" generations: "+strftime("%Y-%m-%d %I:%M:%S")
 			print "best fitness so far: "+str(best.fitness)
 		gens+=1
+		most_modular=population[0] #this has to be done each time, because otherwise modularity would never decrease
 		#each network is evaluated, and mutated
 		next_gen = []
 		#for individual in population:
@@ -267,7 +268,7 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 def main():
 	
-	E=4
+	E=5
 	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
 					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
 
@@ -356,12 +357,12 @@ def main():
 
 		#trial for target A only
 		generations=300
-		population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
+		#population,best_networks = det_pareto(max_cycle, pop_size, generations,mu,p,trial_counter,len(seeds),1,population,number_perfect_networks,attractor_sets,sys.argv[4],E)
 		
 
-		# with open('networks/E1/run3(allpairs)/populationsA'+str(sys.argv[4])+'.pickle', 'rb') as handle:
-		# 	population = pickle.load(handle)[trial_counter]
-		# best_networks=[]
+		with open('networks/E4/run2/populationsA'+str(sys.argv[4])+'.pickle', 'rb') as handle:
+			population = pickle.load(handle)[trial_counter]
+		best_networks=[]
 		print "[targets: "+sys.argv[4]+"] for target A only, modularity: ",str(average_modularity(best_networks))," connections: "+str(average_connectivity(best_networks))
 		population.extend(best_networks)
 		final_population_single.append(population)

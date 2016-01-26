@@ -205,7 +205,7 @@ class GRN(object):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		print "E5"
+		#print "E5"
 		#E5: crossover index is derived probabilistically by modularity rating
 		net1.crossover_preference = net1.E5_get_xover_dist()
 		net2.crossover_preference = net2.E5_get_xover_dist()
@@ -460,12 +460,13 @@ class GRN(object):
 		'''
 		Does some nasty geometry to find proper x' , y' to shorten arrows appropriately in graphical representation of network
 		'''
-		if(y==0 and x==0):
-			return 0,0
+		if(y==0):
+			return 0.001,0.001
 		a = 0.18
 		y_prime = (math.sqrt((a**2)*(y**2)-2*a*(y**2)*math.sqrt((x**2)+(y**2))+(x**2)*(y**2)+y**4))/math.sqrt((x**2)+(y**2))
 		if(y<0):
 			y_prime=-y_prime
+		
 		x_prime= ((x*1.0)/y)*y_prime
 		return x_prime,y_prime
 
