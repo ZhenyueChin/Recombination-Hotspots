@@ -551,6 +551,7 @@ def main():
 	# fig1_netowork_view()
 	# fig2_network_behavior()
 	# fig3_E1_fitcurve_modcurve()
-	fig4_barcharts_fitness()
+	# fig4_barcharts_fitness()
+	fig4_barcharts_modularity()
 	# fig5_6_xover_freqs()
 main()
