@@ -47,6 +47,24 @@ class GRN(object):
 		#print self.nodes
 		return GRN(np.copy(self.nodes[0]),self.nodes.shape[0],np.copy(self.edges),self.genetic_age,np.copy(self.crossover_preference))
 
+	def measure_full_modularity(self):
+		'''
+		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
+		by first converting it to a networkx graph
+		TODO: why on earth am I altering the GRN's actual edges? my god.
+		'''
+
+		self.edges=np.squeeze(np.asarray(self.edges))#compensating for wierd nparray vs matrix bug
+		rows, cols = np.where(self.edges != 0)
+		edges = zip(rows.tolist(), cols.tolist())
+
+		gr = nx.Graph()
+		gr.add_edges_from(edges)
+		partition = community.best_partition(gr)
+		print partition
+		#partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}
+		
+		return community.modularity(partition,gr)
 	def measure_modularity(self):
 		'''
 		Uses the Girvan-Newman algorithm to generate a 'modularity rating' for this network
@@ -437,23 +455,29 @@ class GRN(object):
 		Shows the network behavior by timestep, with target
 		'''
 		print "Rectangle Visualization"
-		num_columns=-1
-		if(num_columns<0):
-			num_columns=int((math.sqrt(len(initial_states))))
+
+		num_columns=int((math.sqrt(len(initial_states))))
+
+		print len(initial_states)
 		print num_columns
 		plt.title(title,fontsize=20)
+		temp = self.nodes
 		for i in range(len(initial_states)):
 			plt.subplot(len(initial_states)/num_columns+1,num_columns,i+1)
-			self.nodes=np.zeros(self.nodes.shape)
+			shape = (10,self.nodes.shape[1])
+			self.nodes=np.zeros(shape)
 			self.nodes[0]=initial_states[i]
 			counter = 1
-			while(counter < self.nodes.shape[0] and self.update_state(counter)):
+			while(counter < self.nodes.shape[0]):
+				self.update_state(counter)
 				counter += 1
 			plt.imshow(np.append(self.nodes,[target],axis=0), cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
 			plt.gca().axes.get_xaxis().set_visible(False)
-
+			if(i% (len(initial_states)/(num_columns+1)) != 0):
+				plt.gca().axes.get_yaxis().set_visible(False)
+		self.nodes=temp
 		plt.subplot(len(initial_states)/num_columns+1,num_columns,2)
-		plt.title(title)
+		
 		plt.show()
 
 	def shorten_line(self,x,y):

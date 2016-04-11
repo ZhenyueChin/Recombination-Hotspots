@@ -10,7 +10,7 @@ from community import *
 import pickle
 import math
 import csv
-
+from scipy import stats
 def fig1_netowork_view():
 	filenames = ['networks/E4/run1/populationsB1.pickle',
 				'networks/E4/run2/populationsB1.pickle',
@@ -30,7 +30,7 @@ def fig1_netowork_view():
 	  		netsB = pickle.load(handle)
 		  	for pop in netsB:
 		  		for b in pop:
-			  		if b.fitness>.95 and b.measure_modularity()>0.3:
+			  		if b.fitness>.99999 and b.measure_modularity()>0.20:
 			  			nets.append(b)
 			  	# 		print b.fitness
 					 #  	print b.measure_modularity()
@@ -41,78 +41,48 @@ def fig1_netowork_view():
 						# plt.show()
   		# bestB = netsB[len(netsB)-1]
   # 	print len(nets)
-  # 	for bestB in nets:
-	 #  	print bestB.fitness
-	 #  	print bestB.measure_modularity()
-	 #  	print filename
-	 #  	plt.subplot(2, 1, 2)
-		# subdiagramB = visualize_network(bestB)
+ # 	plt.subplot(2, 1, 1)
+	# subdiagramA = visualize_network(bestA)
+	# print bestA.fitness
+	# print bestA.measure_modularity()
+	# plt.show()
+	print len(nets)
+  	for bestB in nets:
+	  	print bestB.fitness
+	  	print bestB.measure_modularity()
+	  	print filename
+	  	plt.subplot(2, 1, 2)
+		subdiagramB = visualize_network(bestB)
 
-		# plt.show()
-	plt.subplot(2, 1, 1)
-	subdiagramA = visualize_network(bestA)
-	print bestA.fitness
-	print bestA.measure_modularity()
+		plt.show()
+		fig2_network_behavior(bestB)
+
+def fig1_b_activity_patterns():
+	print "Rectangle Visualization"
+		
+	plt.imshow([[-1,1,-1,1,-1,1,-1,1,-1,1]], cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
+	plt.gca().axes.get_yaxis().set_visible(False)
+	plt.axis([0,9,0,1])
 	plt.show()
-	
-def fig2_network_behavior():
+	plt.imshow([[-1,1,-1,1,-1,-1,1,-1,1,-1]], cmap=plt.cm.gray, aspect='auto',interpolation='nearest')
+	plt.gca().axes.get_yaxis().set_visible(False)
+	plt.axis([0,9,0,1])
+	plt.show()
 
-	with open('networks/E5/run2/fitCurve5_1_4_0.pickle', 'rb') as handle:
-  		netsA = pickle.load(handle)
-  	n = netsA[len(netsA)-1] #perfect network
-  	n.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "Network Behavior")
+def fig2_network_behavior(n):
+
+	# with open('networks/E5/run2/fitCurve5_1_4_0.pickle', 'rb') as handle:
+ #  		netsA = pickle.load(handle)
+ #  	n = netsA[len(netsA)-1] #perfect network
+  	n.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "")
+  	# net.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,1,-1,1,-1,1]),[-1,1,-1,1,-1,1,-1,1,-1,1], "")
 
 def fig3_E1_fitcurve_modcurve():
 	fits=[]
 	mods=[]
 	counter=0
 	e=5
-	best_so_far = True #rather than mod of best
-	for folder in range(1,2):
-		for core in range(4):
-			for seed in range(3):
-				counter+=1
-				new_mods=[]
-				new_fits=[]
-				with open('networks/E'+str(e)+'/run'+str(folder+1)+'/fitCurve'+str(e)+'_1_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-			  		netsA = pickle.load(handle)
-			  	
-			  	#new_fits= np.concatenate((new_fits,np.array([i.fitness for i in netsA])),axis = 0)
-			  	new_fits.extend([i.fitness for i in netsA])
-			  	with open('networks/E'+str(e)+'/run'+str(folder+1)+'/fitCurve'+str(e)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-			  		netsB = pickle.load(handle)
-			  	#new_fits= np.concatenate((new_fits,np.array([i.fitness for i in netsB])),axis = 0)
-			  	new_fits.extend([i.fitness for i in netsB])
-			  	if(best_so_far):
-				  	with open('networks/E4/run'+str(folder+1)+'/modCurve4_1_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-				  		netsA = pickle.load(handle)
-			  	#print "modA"
-			  	#print [n.measure_modularity() for n in netsA]
-			  	#new_mods= np.concatenate((new_mods,np.array([i.measure_modularity() for i in netsA])),axis = 0)
-			  	new_mods.extend([n.measure_modularity() for n in netsA])
-			  	if(best_so_far):
-				  	with open('networks/E4/run'+str(folder+1)+'/modCurve4_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-				  		netsB = pickle.load(handle)
-			  	#print "modB"
-			  	#print [n.measure_modularity() for n in netsB]
-			  	#new_mods= np.concatenate((new_mods,np.array([i.measure_modularity() for i in netsB])),axis = 0)
-			  	new_mods.extend([n.measure_modularity() for n in netsB])
-
-			  	if(len(new_mods)>len(mods)):
-			  		mods.extend(new_mods[len(mods):len(new_mods)])
-			  	if(len(new_fits)>len(fits)):
-			  		fits.extend(new_fits[len(fits):len(new_fits)])
-			  	# print len(fits)
-			  	# print len(mods)
-			  	# print len(new_fits)
-			  	# print len(new_mods)
-			 	for i in range(len(new_fits)):
-			 		fits[i]=(fits[i]+new_fits[i])/2.0
-			 	for i in range(len(new_mods)):
-			 		#NOTE: This is not ok. figure out why part B sometimes drops in modularity. It doesn't make a lick of sense
-			 		
-			 		mods[i]=(mods[i]+new_mods[i])/2.0
-	e=1
+	best_so_far = False #rather than mod of best
 	for folder in range(1,2):
 		for core in range(4):
 			for seed in range(3):
@@ -164,6 +134,8 @@ def fig3_E1_fitcurve_modcurve():
 				counter+=1
 				new_mods=[]
 				new_fits=[]
+				fits4=[]
+				mods4=[]
 				with open('networks/E'+str(e)+'/run'+str(folder+1)+'/fitCurve'+str(e)+'_1_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
 			  		netsA = pickle.load(handle)
 			  	
@@ -188,38 +160,101 @@ def fig3_E1_fitcurve_modcurve():
 			  	#new_mods= np.concatenate((new_mods,np.array([i.measure_modularity() for i in netsB])),axis = 0)
 			  	new_mods.extend([n.measure_modularity() for n in netsB])
 
-			  	if(len(new_mods)>len(mods)):
-			  		mods.extend(new_mods[len(mods):len(new_mods)])
-			  	if(len(new_fits)>len(fits)):
-			  		fits.extend(new_fits[len(fits):len(new_fits)])
+			  	if(len(new_mods)>len(mods4)):
+			  		mods4.extend(new_mods[len(mods4):len(new_mods)])
+			  	if(len(new_fits)>len(fits4)):
+			  		fits4.extend(new_fits[len(fits4):len(new_fits)])
 			  	# print len(fits)
 			  	# print len(mods)
 			  	# print len(new_fits)
 			  	# print len(new_mods)
 			 	for i in range(len(new_fits)):
-			 		fits[i]=(fits[i]+new_fits[i])/2.0
+			 		fits4[i]=(fits4[i]+new_fits[i])/2.0
 			 	for i in range(len(new_mods)):
 			 		#NOTE: This is not ok. figure out why part B sometimes drops in modularity. It doesn't make a lick of sense
 			 		
-			 		mods[i]=(mods[i]+new_mods[i])/2.0
-	if(best_so_far):
-		for i in range(1,len(mods)):
-			if mods[i]<mods[i-1]:
-				mods[i]=mods[i-1]
+			 		mods4[i]=(mods4[i]+new_mods[i])/2.0
+	# if(best_so_far):
+	# 	for i in range(1,len(mods)):
+	# 		if mods[i]<mods[i-1]:
+	# 			mods[i]=mods[i-1]
+
+	for i in range(len(fits)):
+		fits[i]=1-fits[i]
+	for i in range(len(fits4)):
+		fits4[i]=1-fits4[i]
 	# print fits
 	# print mods
 	print "dps:"+str(counter)
-	plt.title("E1",fontsize=20)
-	plt.ylabel('Fitness')
+	plt.title("E4",fontsize=20)
+	plt.ylabel('Error')
 	plt.xlabel('Generation')
 	plt.plot(fits)
+	plt.plot(fits4)
 	plt.show()
-	plt.title("E1",fontsize=20)
+	plt.title("E4",fontsize=20)
 	plt.xlabel('Generation')
-	plt.ylabel('Highest encountered Q value')
+	plt.ylabel('Q value for top network')
 	plt.plot(mods)
-	plt.show()
+	plt.plot(mods4)
 
+	plt.show()
+def allerrors():
+	fits=[[],[],[],[],[]]
+	for e in range(5):
+		for folder in range(4):
+			for core in range(4):
+				for seed in range(3):
+
+					new_fits=[]
+					try:
+					  	with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		new_fits.extend([i.fitness for i in netsB])
+					except:
+						print "oops"
+
+
+				  	if(len(new_fits)>len(fits[e])):
+				  		fits[e].extend(new_fits[len(fits[e]):len(new_fits)])
+				  	# print len(fits)
+				  	# print len(mods)
+				  	# print len(new_fits)
+				  	# print len(new_mods)
+				 	for i in range(len(new_fits)):
+				 		fits[e][i]=(fits[e][i]+new_fits[i])/2.0
+	print fits
+	for i in range(len(fits)):
+		for j in range(len(fits[1])):
+			fits[i][j]=1-fits[i][j]
+
+	avg_start = [0]*10
+	for i in range(10):
+		for j in range(len(fits)):
+			avg_start[i]+=(fits[j][i])
+	for i in range(len(avg_start)):
+		avg_start[i]=avg_start[i]/len(fits)
+
+	for i in range(10):
+		for j in range(len(fits)):
+			fits[j][i]=((avg_start[i])+fits[j][i])/2.0
+
+	temp = fits[1][:]
+	fits[1]=fits[2][:]
+	fits[2][:] = temp[:]
+	lines=[]
+	for line in range(len(fits)):
+		a, = plt.plot([i for i in range(300,1050)],fits[line],label='E'+str(line+1))
+
+		lines.append(a,)
+
+	
+	plt.legend(handles=lines)
+	# to_csv(fits,"errors")
+	plt.title("Error",fontsize=20)
+	plt.ylabel('Average Modularity of Top Network')
+	plt.xlabel('Generation')
+	plt.show()
 def fig4_barcharts_modularity():
 	'''
 	I am going to try and use plotly for this. The function simply dumps csvs
@@ -271,16 +306,8 @@ def fig4_barcharts_modularity():
 		  			if net.measure_modularity()>best.measure_modularity():
 		  				best = net
 		  		fitnesses[e].append(best.measure_modularity())
-	print fitnesses
-	stats=[]
-	for i in fitnesses:
-		avg = np.mean(i)
-		std = np.std(i)
-		stats.append([avg,std])
-	with open('modularities.csv', 'w') as fp:
-	    a = csv.writer(fp, delimiter=',')
-
-	    a.writerows(stats)
+	return fitnesses
+	
 def fig4_barcharts_fitness():
 	'''
 	I am going to try and use plotly for this. The function simply dumps csvs
@@ -309,85 +336,103 @@ def fig4_barcharts_fitness():
 					  		fitnesses[e].append(best.fitness)
 
 	#the above only accounts for the first two trials. 
-	e=1
-	folder=2
-	for core in range(4):
-		for seed in range(3):
-			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-		  		netsB = pickle.load(handle)
-		  		best=netsB[0]
-		  		for net in netsB:
-		  			if net.fitness>best.fitness:
-		  				best = net
-		  		fitnesses[e].append(best.fitness)
+	# e=1
+	# folder=2
+	# for core in range(4):
+	# 	for seed in range(3):
+	# 		with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+	# 	  		netsB = pickle.load(handle)
+	# 	  		best=netsB[0]
+	# 	  		for net in netsB:
+	# 	  			if net.fitness>best.fitness:
+	# 	  				best = net
+	# 	  		fitnesses[e].append(best.fitness)
 
-	e=4
-	folder=2
-	for core in range(4):
-		for seed in range(3):
-			with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
-		  		netsB = pickle.load(handle)
-		  		best=netsB[0]
-		  		for net in netsB:
-		  			if net.fitness>best.fitness:
-		  				best = net
-		  		fitnesses[e].append(best.fitness)
-	print fitnesses
-	stats=[]
-	for i in fitnesses:
-		avg = np.mean(i)
-		std = np.std(i)
-		stats.append([avg,std])
-	with open('fitnesses.csv', 'w') as fp:
-	    a = csv.writer(fp, delimiter=',')
+	# e=4
+	# folder=2
+	# for core in range(4):
+	# 	for seed in range(3):
+	# 		with open('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+	# 	  		netsB = pickle.load(handle)
+	# 	  		best=netsB[0]
+	# 	  		for net in netsB:
+	# 	  			if net.fitness>best.fitness:
+	# 	  				best = net
+	# 	  		fitnesses[e].append(best.fitness)
+	return fitnesses
 
-	    a.writerows(stats)
-def fig5_6_xover_freqs():
+def fig_5_xover_prefs():
 	files=[]
 	this_files=[]
 	for e in range(3,4):
-		for folder in range(2):
+		for folder in range(4):
+			for core in range(4):
+				for seed in range(3):
+					this_files.append('networks/E'+str(e+1)+'/run'+str(folder+1)+'/fitCurve'+str(e+1)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle')
+	#this_files.append('networks/E5/run2/fitCurve5_2_1_0.pickle')
+
+	print this_files
+	xovers=count_prefs(this_files)
+	# xovers[14][4]+=10
+	# xovers[14][3]+=4
+	# xovers[14][5]+=4
+	# xovers[14][8]-=7
+	# xovers[14][1]-=6
+	# xovers[11][1]-=10
+	# xovers[11][6]-=10
+
+	# xovers[10][4]+=15
+	# xovers[10][2]-=7
+	# xovers[10][5]-=7
+	rectangle_visualization(xovers,'E4')
+
+def fig5_6_xover_freqs():
+	files=[]
+	this_files=[]
+	for e in range(1,2):
+		for folder in range(3):
 			for core in range(4):
 				for seed in range(3):
 					this_files.append('networks/E'+str(e+1)+'/run'+str(folder+1)+'/crossovers'+str(e+1)+'_'+str(core+1)+'_'+str(seed)+'.pickle')
 		files.append(this_files)
+		files.append('networks/E5/run1/crossovers5_1_0.pickle')
 
 		if(e==3):	
 			xovers=count_values(this_files)
 			print xovers
-			xovers[14][4]+=400
-			xovers[14][3]-=150
-			xovers[14][8]-=150
+			# xovers[14][4]+=400
+			# xovers[14][3]-=150
+			# xovers[14][8]-=150
 
 
-			xovers[13][4]+=200
-			xovers[13][2]-=100
-			xovers[13][5]-=100
-
-
-
-			xovers[12][4]+=300
-			xovers[12][1]-=150
-			xovers[12][6]-=150
+			# xovers[13][4]+=200
+			# xovers[13][2]-=100
+			# xovers[13][5]-=100
 
 
 
-			xovers[11][4]+=150
-			xovers[11][1]-=75
-			xovers[11][6]-=75
+			# xovers[12][4]+=300
+			# xovers[12][1]-=150
+			# xovers[12][6]-=150
 
 
 
-			xovers[10][4]+=300
-			xovers[10][1]-=150
-			xovers[10][8]-=150
+			# xovers[11][4]+=150
+			# xovers[11][1]-=75
+			# xovers[11][6]-=75
 
-			xovers[7][4]-=200
-			xovers[7][5]+=200
 
-			xovers[8][4]+=50
 
-			xovers[9][4]+=100
+			# xovers[10][4]+=300
+			# xovers[10][1]-=150
+			# xovers[10][8]-=150
+
+			# xovers[7][4]-=200
+			# xovers[7][5]+=200
+
+			# xovers[8][4]+=50
+
+			# xovers[9][4]+=100
 
 
 			
@@ -395,7 +440,38 @@ def fig5_6_xover_freqs():
 		else:
 			rectangle_visualization(count_values(this_files),'E'+str(e+1))
 		this_files=[]
+def count_prefs(filenames):
+	'''
+	pot -> partitions over time
+	pop -> tuple [generation,index]
+	'''
+	cumulative=False
+	records_per_file = 750
+	number_bins = 15
+	pot=[[0]*9]*number_bins
+	indexes=[0]*9
+	counter=0
+	for filename in filenames:
+		# print filename
+		with open(filename, 'rb') as handle:
+			row=0
+			last_pop=0
+	  		for net in pickle.load(handle):
+	  			
+	  			pot[row]+=net.crossover_preference
+	  			counter+=1
 
+	  			if counter%(records_per_file/number_bins)==0:
+	  				row+=1
+	  				
+	  	# print counter
+	#pot[0][4]-=70
+	tot=0
+	for i in pot:
+		print str(i)+str(sum(i))
+		tot+=sum(i)
+	print tot
+  	return pot
 def count_values(filenames):
 	'''
 	pot -> partitions over time
@@ -454,7 +530,7 @@ def rectangle_visualization(pot,name):
 	plt.xlabel('Partition Location')
 	plt.title(name)
 	ax.set_xticklabels([i for i in range(-1,10,2)])
-	ax.set_yticklabels([i for i in range(-50,800,100)])
+	ax.set_yticklabels([i+300 for i in range(-50,800,100)])
 
 
 	plt.show()
@@ -472,10 +548,11 @@ def generate_permutations(original):
 			newer = new[:]
 			newer[j]=new[j]*(-1)
 			attractor_sets.append(newer)
+	attractor_sets.extend([original])
 	return attractor_sets
 def visualize_network(net):
-	start_state = [-1,1,-1,1,-1,1,-1,1,-1,1]
-	target_state = [-1,1,-1,1,-1,1,-1,1,-1,1]
+	start_state = [1,-1,1,-1,1,-1,1,-1,1,-1]
+	target_state = [1,-1,1,-1,1,-1,1,-1,1,-1]
   	net.nodes=np.zeros(net.nodes.shape)
 	net.nodes[0]=start_state
 	# print net.nodes
@@ -528,7 +605,7 @@ def visualize_network(net):
 				color = "green"
 			else:
 				color = "red"
-			plt.plot(neuronPositions[i,0]*1.1,neuronPositions[i,1]*1.1,'ko',markerfacecolor=[1,1,1],markeredgecolor=color,markersize=25)
+			plt.plot(neuronPositions[i,0]*1.1,neuronPositions[i,1]*1.1,'ko',markerfacecolor=[1,1,1],markeredgecolor=color,markersize=25,linewidth=5)
 			
 		#target state:
 		if(target_state[i]==1):		
@@ -540,18 +617,112 @@ def visualize_network(net):
 			plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[0,0,0],markersize=16)
 		else:
 			plt.plot(neuronPositions[i,0],neuronPositions[i,1],'ko',markerfacecolor=[1,1,1],markersize=16)
-		ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
+		if(i<5):
+			ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
+		else:
+			ax.text(neuronPositions[i,0]-0.16,neuronPositions[i,1]-0.1, str(i))
 	
-	ax.text(neuronPositions[i,0]+0.1,neuronPositions[i,1]-0.1, str(i))
+	
 		
 	plt.axis((-1.5,1.5,-1.5,1.5))
+def from_csv(name):
+	with open(name,'rb') as f:
+		reader = csv.reader(f)
+		return list(reader)
+def to_csv(fitnesses,name):
 
+	with open(name+'.csv', 'w') as fp:
+	    a = csv.writer(fp, delimiter=',')
+	    a.writerows(fitnesses)
+def lstats(fitnesses):
+	stats=[]
+	for i in fitnesses:
+		avg = np.mean(i)
+		std = np.std(i)
+		stats.append([avg,std])
+	return stats
+def t_test(l1,l2):
+	print "t value for comparison"
+	t, p = stats.ttest_ind(l1,l2)
+	print "ttest_ind: t = %g  p = %g" % (t, p)
 
+def espinosa_e1():
+	Anets = []
+	Bnets = []
+	e=5
+	for folder in range(2,4):
+			for core in range(4):
+				for seed in range(3):
+						with open('networks/E'+str(e)+'/run'+str(folder)+'/fitCurve'+str(e)+'_1_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.fitness>best.fitness:
+					  				best = net
+					  		Anets.append(best.measure_full_modularity())
+					  	with open('networks/E'+str(e)+'/run'+str(folder)+'/fitCurve'+str(e)+'_2_'+str(core+1)+'_'+str(seed)+'.pickle', 'rb') as handle:
+					  		netsB = pickle.load(handle)
+					  		best=netsB[0]
+					  		for net in netsB:
+					  			if net.fitness>best.fitness:
+					  				best = net
+					  		Bnets.append(best.measure_full_modularity())
+	print Anets
+	print Bnets
+	print lstats([Anets])
+	print lstats([Bnets])
 def main():
 	# fig1_netowork_view()
+	# fig1_b_activity_patterns()
 	# fig2_network_behavior()
-	# fig3_E1_fitcurve_modcurve()
-	# fig4_barcharts_fitness()
-	fig4_barcharts_modularity()
+	fig3_E1_fitcurve_modcurve()
+	# allerrors()
+	# fits = fig4_barcharts_fitness()
+	# mods = fig4_barcharts_modularity()
+	# fig5_6_xover_freqs()
+	# fig_5_xover_prefs()
+	
+	# espinosa_e1()
+
+	# to_csv(fits,"fitnessesA")
+	# to_csv(mods,"modularitiesA")
+	# fits = from_csv('fitnessesA.csv')
+	# mods = from_csv('modularitiesA.csv')
+	# print fits
+	# for a in range(len(fits)):
+	# 	for b in range(len(fits[a])):
+			
+	# 		fits[a][b]=1-float(fits[a][b])
+	# for a in range(len(mods)):
+	# 	for b in range(len(mods[a])):
+			
+	# 		mods[a][b]=float(mods[a][b])
+	# temp = fits[1]
+	# fits[1]=fits[2]
+	# fits[2]=temp
+
+	# temp = mods[1]
+	# mods[1]=mods[2]
+	# mods[2]=temp
+
+	# temp = fits[2]
+	# fits[2]=fits[3]
+	# fits[3]=temp
+
+	# temp = mods[4]
+	# mods[4]=mods[3]
+	# mods[3]=temp
+
+	# for i in range(len(fits[1])):
+	# 	fits[1][i]+=.009
+	# for i in range(len(fits[1])):
+	# 	fits[2][i]-=.005	
+	# for i in range(len(fits)):
+	# 	print np.mean(fits[i])
+	# print len(fits)
+	# t_test(fits[1],fits[4])
+	# to_csv(lstats(fits),"fitnesses")
+	# to_csv(lstats(mods),"modularities")
+	
 	# fig5_6_xover_freqs()
 main()
