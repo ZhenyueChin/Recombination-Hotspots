@@ -26,7 +26,7 @@ class GRN(object):
 
 		self.nodes = GRN.matrix_create(max_cycles,n)
 		if(crossover_preference is None):
-			crossover_preference = np.random.dirichlet(np.ones(9))
+			crossover_preference = np.random.dirichlet(np.ones(11))
 			#print "no prior xover"
 		self.crossover_preference=crossover_preference
 
@@ -80,7 +80,7 @@ class GRN(object):
 		gr.add_edges_from(edges)
 		#partition = community.best_partition(gr)
 		#print partition
-		partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1}
+		partition = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 1, 7: 1, 8: 1, 9: 1, 10:1, 11:1}
 		
 		return community.modularity(partition,gr)
 		#@profile
@@ -105,8 +105,8 @@ class GRN(object):
 		#generate a DETERMINISTIC set of perturbations of the target attractor:
 		#start_attractors = generate_initial_attractors(target_attractor,200,p)
 		fitness_values = list()
-		target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),
-						   np.array([-1,1,-1,1,-1,-1,1,-1,1,-1])]
+		target_attractors=[np.array([-1,1,-1,1,-1,1,-1,1,-1,1,-1,1]),
+						   np.array([-1,1,-1,1,-1, 1,1,-1,1,-1,1,-1])]
 
 		for set_index in range(num_targets):
 		
@@ -180,10 +180,10 @@ class GRN(object):
 
 		gr = nx.Graph()
 		gr.add_edges_from(edges)
-		modularity_ratings=np.zeros(9)
-		for i in range(1,10): #possible indexes are [1,9]
+		modularity_ratings=np.zeros(11)
+		for i in range(1,12): #possible indexes are [1,9]
 			seq1 =range(0,i)
-			seq2 =range(9,i-1,-1)
+			seq2 =range(11,i-1,-1)
 
 			partition = dict.fromkeys(seq1,0)
 			partition.update(dict.fromkeys(seq2,1))
@@ -232,12 +232,12 @@ class GRN(object):
 
 		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 			
-		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+		child1=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 
-		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+		child2=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
@@ -258,12 +258,12 @@ class GRN(object):
 		crossover_index = GRN.sample_from_prob_distribution(new_probability_matrix)
 		
 		prob_mat_choice = rand.choice([0,1])
-		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+		child1=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   old_probability_matrices[prob_mat_choice])
 
-		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+		child2=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   old_probability_matrices[abs(prob_mat_choice-1)])
@@ -277,14 +277,14 @@ class GRN(object):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		crossover_index=5
+		crossover_index=6
 		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
-		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+		child1=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 
-		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+		child2=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
@@ -296,14 +296,14 @@ class GRN(object):
 		'''
 		Note that as of 1/7/16, the parent networks are NOT affected by this function. Two children networks are returned.
 		'''
-		crossover_index = rand.randint(1,9)
+		crossover_index = rand.randint(1,11)
 		new_probability_matrix=(net1.crossover_preference+net2.crossover_preference)/2
-		child1=GRN(np.zeros(10),net1.nodes.shape[0],
+		child1=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net2.edges[:crossover_index],net1.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
 
-		child2=GRN(np.zeros(10),net1.nodes.shape[0],
+		child2=GRN(np.zeros(12),net1.nodes.shape[0],
 			       np.concatenate([net1.edges[:crossover_index],net2.edges[crossover_index:]]),
 				   max(net1.genetic_age,net2.genetic_age),
 				   new_probability_matrix)
@@ -442,7 +442,7 @@ class GRN(object):
 		self.nodes[t,:][self.nodes[t,:] == 0] = -1
 
 		#check for nodes with no inputs:
-		for target_gene in range(0,10):
+		for target_gene in range(0,12):
 			if(np.count_nonzero(self.edges[:,target_gene])==0):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
 
@@ -464,7 +464,7 @@ class GRN(object):
 		temp = self.nodes
 		for i in range(len(initial_states)):
 			plt.subplot(len(initial_states)/num_columns+1,num_columns,i+1)
-			shape = (10,self.nodes.shape[1])
+			shape = (12,self.nodes.shape[1])
 			self.nodes=np.zeros(shape)
 			self.nodes[0]=initial_states[i]
 			counter = 1

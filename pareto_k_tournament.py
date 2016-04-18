@@ -16,12 +16,12 @@ def generate_permutations(original):
 	generates all pair permutations of the original matrix
 	'''
 	attractor_sets=[]
-	for i in range(10):
+	for i in range(12):
 		new = original[:]
 		new[i]=new[i]*(-1)
 
 		attractor_sets.append(new)
-		for j in range(i+1,10):
+		for j in range(i+1,12):
 			newer = new[:]
 			newer[j]=new[j]*(-1)
 			attractor_sets.append(newer)
@@ -158,7 +158,8 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 	'''
 	# plt.ion()
 	# plt.show()
-	targetA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1])
+	targetA = np.array([-1,1,-1,1,-1,1,-1,1,-1,1,-1,1])
+
 	#initial network: 200 networks with identical randomized edges:
 	network_size = len(targetA)
 	#initial_edges = model.GRN.initialize_edges(network_size,network_size)
@@ -268,9 +269,9 @@ def det_pareto(max_cycle, pop_size, generations,mu,p,run_number,num_runs,num_tar
 
 def main():
 	
-	E=5
-	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1],
-					   [-1,1,-1,1,-1,-1,1,-1,1,-1]]
+	E=4
+	target_attractors=[[-1,1,-1,1,-1,1,-1,1,-1,1,-1,1],
+						   [-1,1,-1,1,-1, 1,1,-1,1,-1,1,-1]]
 
 	# attractor_sets = [[ [-1,1,-1,1,-1,1,-1,1,-1,1],
 	# 					[1,1,-1,1,-1,1,-1,1,-1,1],
@@ -347,12 +348,12 @@ def main():
 		pickle.dump([],open('networks/crossovers'+str(E)+'_'+str(sys.argv[4])+'_'+str(trial_counter)+'.pickle','wb'))
 		
 		rand.seed(seed)
-		new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
+		new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
 		print new_network.measure_modularity()
 		#initialize population
 		population=list()
 		for i in range(int(pop_size)):
-			new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
+			new_network = model.GRN(np.array([-1,1,-1,1,-1,1,-1,1,-1,1,-1,1]),max_cycle)
 			population.append(new_network) #initially randomized
 
 		#trial for target A only
