@@ -352,6 +352,6 @@ def main(v):
 	print "ttest_ind: t = %g  p = %g" % (t, p)
 
 
-	# toShow.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "TargetB, Fitness = "+str(toShow.fitness))
+	toShow.rectangle_visualization(generate_permutations([-1,1,-1,1,-1,-1,1,-1,1,-1]),[-1,1,-1,1,-1,-1,1,-1,1,-1], "TargetB, Fitness = "+str(toShow.fitness))
 	# toShow.visualize_network([-1,-1,-1,1,-1,1,1,-1,1,-1],[-1,1,-1,1,-1,-1,1,-1,1,-1],20)
 main(sys.argv)

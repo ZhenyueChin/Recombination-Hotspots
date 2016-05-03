@@ -442,7 +442,7 @@ class GRN(object):
 		self.nodes[t,:][self.nodes[t,:] == 0] = -1
 
 		#check for nodes with no inputs:
-		for target_gene in range(0,12):
+		for target_gene in range(0,10):
 			if(np.count_nonzero(self.edges[:,target_gene])==0):
 				self.nodes[t,target_gene]=self.nodes[t-1,target_gene]
 
@@ -523,7 +523,7 @@ class GRN(object):
 		plt.show()
 		active=True
 		while(active):
-			
+			print "still visualizing"
 			plt.cla()
 			#draw straight connections (non-reccurent)	
 			for i in range(0,numNeurons):
